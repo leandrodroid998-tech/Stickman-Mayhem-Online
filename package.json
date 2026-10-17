@@ -1,0 +1,11 @@
+{
+  "name": "stick-mayhem",
+  "version": "1.4.0",
+  "description": "STICK MAYHEM — jogo de luta HTML5 com online (servidor de jogo + sinalização)",
+  "main": "server.js",
+  "scripts": {"start": "node server.js"},
+  "engines": {"node": ">=18"},
+  "dependencies": {"ws": "^8.18.0"},
+  "license": "UNLICENSED",
+  "private": true
+}
