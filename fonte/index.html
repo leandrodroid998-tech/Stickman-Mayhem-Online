@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b0820">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>STICK MAYHEM v1.4.0</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="ui">
+  <div id="topbtns">
+    <button class="icon-btn" id="btn-mute" aria-label="Som"><i data-i="vol"></i></button>
+    <button class="icon-btn" id="btn-fs" aria-label="Tela cheia"><i data-i="full"></i></button>
+  </div>
+
+  <!-- MENU PRINCIPAL -->
+  <section id="s-menu" class="screen active">
+    <div class="menu-wrap">
+      <div class="logo"><img class="logo-img" src="logo.png" alt="Stickman Mayhem"><div class="logo-sub">LUTA · FÍSICA RAGDOLL · CAOS</div></div>
+      <div class="menu-btns">
+        <button class="btn big primary" data-go="play"><i data-i="play"></i> <span>JOGAR</span></button>
+        <button class="btn online" data-go="online"><i data-i="globe"></i> <span>ONLINE</span></button>
+        <button class="btn" data-go="custom"><i data-i="palette"></i> <span>PERSONALIZAR</span></button>
+        <button class="btn" data-go="weapons"><i data-i="swords"></i> <span>ARMAS</span></button>
+        <button class="btn" data-go="arenas"><i data-i="arena"></i> <span>ARENAS</span></button>
+        <button class="btn" data-go="settings"><i data-i="sliders"></i> <span>CONFIGURAÇÕES</span></button>
+        <button class="btn" data-go="stats"><i data-i="chart"></i> <span>ESTATÍSTICAS</span></button>
+      </div>
+    </div>
+    <div class="ver" id="ver"></div>
+    <div class="coins-tag"><i data-i="coin"></i> <span id="coins-menu">0</span></div>
+  </section>
+
+  <!-- ESCOLHA DE MODO -->
+  <section id="s-play" class="screen">
+    <header><button class="btn back" data-go="menu"><i data-i="back"></i></button><h2>JOGAR</h2><div class="coins-tag"><i data-i="coin"></i> <span class="coins-val">0</span></div></header>
+    <div class="play-body">
+      <div class="modes" id="mode-list">
+        <div class="sec-title">1 · MODO DE JOGO</div>
+        <button class="mode-card" data-mode="duel_cpu"><div class="mi"><i data-i="bot"></i></div><div class="mt"><b>DUELO vs CPU</b><small>1v1 contra a IA · AWAKENING opcional</small></div><span class="mk"><i data-i="check"></i></span></button>
+        <button class="mode-card" data-mode="duel_local"><div class="mi"><i data-i="users"></i></div><div class="mt"><b>DUELO LOCAL</b><small>2 jogadores no mesmo aparelho</small></div><span class="mk"><i data-i="check"></i></span></button>
+        <button class="mode-card" data-mode="chaos"><div class="mi"><i data-i="burst"></i></div><div class="mt"><b>CHAOS ARENA</b><small>Você + 3 bots · armas do céu</small></div><span class="mk"><i data-i="check"></i></span></button>
+      </div>
+      <div class="play-side">
+        <div class="glass">
+          <div class="sec-title">2 · ARENA <span id="arena-name"></span></div>
+          <div class="chips arena-chips" id="opt-arena"></div>
+          <div class="opt" id="opt-diff-row"><label>Dificuldade</label><div class="chips" id="opt-diff"></div></div>
+          <div class="opt" id="opt-format-row"><label>Formato</label><div class="chips" id="opt-format"></div></div>
+          <div class="mode-info" id="mode-info"></div>
+        </div>
+        <div class="start-row"><button class="btn big primary" id="btn-start"><i data-i="swords"></i> <span>LUTAR!</span></button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONFIGURAÇÃO DA PARTIDA 1v1 -->
+  <section id="s-config" class="screen">
+    <header><button class="btn back" data-go="play"><i data-i="back"></i></button><h2 id="cfg-title">CONFIGURAR PARTIDA</h2></header>
+    <div class="scroll"><div class="settings cfg" id="cfg-body"></div></div>
+    <div class="start-row"><button class="btn big primary" id="btn-cfg-start"><i data-i="swords"></i> <span>COMEÇAR</span></button></div>
+  </section>
+
+  <!-- PERSONALIZAR -->
+  <section id="s-custom" class="screen">
+    <header><button class="btn back" data-go="menu"><i data-i="back"></i></button><h2>PERSONALIZAR</h2><div class="coins-tag"><i data-i="coin"></i> <span class="coins-val">0</span></div></header>
+    <div class="custom-body">
+      <div class="prev-wrap">
+        <div class="cp-tog" id="cp-tog"></div>
+        <div class="prev-stage"><canvas id="cust-prev" width="360" height="420"></canvas></div>
+        <div class="prev-cap" id="prev-cap"></div>
+        <small>Toque no boneco para alternar a animação</small>
+      </div>
+      <div class="custom-side">
+        <div class="tabs" id="cust-tabs"></div>
+        <div class="subs hidden" id="cust-subs"></div>
+        <div class="grid scroll" id="cust-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARMAS -->
+  <section id="s-weapons" class="screen">
+    <header><button class="btn back" data-go="menu"><i data-i="back"></i></button><h2>ARSENAL · 32 ARMAS</h2></header>
+    <div class="scroll"><div class="cards" id="weap-grid"></div></div>
+  </section>
+
+  <!-- ARENAS -->
+  <section id="s-arenas" class="screen">
+    <header><button class="btn back" data-go="menu"><i data-i="back"></i></button><h2>ARENAS</h2></header>
+    <div class="scroll"><div class="cards" id="arena-grid"></div></div>
+  </section>
+
+  <!-- CONFIGURAÇÕES -->
+  <section id="s-settings" class="screen">
+    <header><button class="btn back" id="set-back"><i data-i="back"></i></button><h2>CONFIGURAÇÕES</h2></header>
+    <div class="scroll"><div class="settings" id="set-body"></div></div>
+  </section>
+
+  <!-- ESTATÍSTICAS -->
+  <section id="s-stats" class="screen">
+    <header><button class="btn back" data-go="menu"><i data-i="back"></i></button><h2>ESTATÍSTICAS E DESAFIOS</h2><div class="coins-tag"><i data-i="coin"></i> <span class="coins-val">0</span></div></header>
+    <div class="scroll"><div id="stats-body"></div></div>
+  </section>
+
+  <!-- ONLINE -->
+  <section id="s-online" class="screen">
+    <header><button class="btn back" id="on-back"><i data-i="back"></i></button><h2>ONLINE</h2><div class="net-ping hidden" id="on-ping"></div></header>
+    <div class="scroll"><div class="on-body">
+      <div id="on-home">
+        <div class="glass on-name"><label for="on-name">SEU NOME</label><input id="on-name" maxlength="12" autocomplete="off" spellcheck="false" placeholder="JOGADOR"></div>
+        <div class="on-cols">
+          <div class="glass on-card"><div class="sec-title">CRIAR SALA</div><p>Gere um código de convite e chame até 3 amigos (4 jogadores no total).</p><button class="btn big primary" id="on-create"><i data-i="globe"></i> <span>CRIAR SALA</span></button></div>
+          <div class="glass on-card"><div class="sec-title">ENTRAR COM CÓDIGO</div><p>Digite o código de 6 caracteres que o anfitrião enviou.</p><input id="on-code" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC123"><button class="btn big" id="on-join"><i data-i="play"></i> <span>ENTRAR</span></button></div>
+        </div>
+        <div class="on-msg" id="on-msg" role="status"></div>
+        <details class="glass on-adv" id="on-adv"><summary>SERVIDOR DE SINALIZAÇÃO (AVANÇADO)</summary>
+          <p>Por padrão usa o próprio servidor do site onde o jogo está hospedado (se abrir o arquivo local, usa o servidor público do PeerJS). Só preencha para usar outro servidor — todos da sala devem usar o mesmo.</p>
+          <div class="on-adv-grid"><input id="on-h" placeholder="host (vazio = padrão)"><input id="on-p" placeholder="porta" inputmode="numeric"><input id="on-path" placeholder="caminho (/)"><label class="on-sec"><input type="checkbox" id="on-sec"> HTTPS/WSS</label></div>
+        </details>
+      </div>
+      <div id="on-room" class="hidden">
+        <div class="glass on-code-box"><div class="sec-title">CÓDIGO DA SALA</div><div class="on-code-big" id="on-code-big">------</div>
+          <div class="on-code-btns"><button class="btn" id="on-copy"><i data-i="copy"></i> <span>COPIAR CÓDIGO</span></button><button class="btn" id="on-share"><i data-i="users"></i> <span>CONVIDAR</span></button></div></div>
+        <div class="glass"><div class="sec-title">JOGADORES <span id="on-count">1/4</span></div><div id="on-players" class="on-players"></div></div>
+        <div class="glass" id="on-opts"><div class="sec-title">PARTIDA</div>
+          <div class="opt"><label>Arena</label><div class="chips" id="on-o-arena"></div></div>
+          <div class="opt"><label>Vidas</label><div class="chips" id="on-o-lives"></div></div>
+          <div class="opt"><label>Armas</label><div class="chips" id="on-o-weap"></div></div></div>
+        <div class="on-status" id="on-status"></div>
+        <div class="on-btns"><button class="btn big primary" id="on-start"><i data-i="swords"></i> <span>INICIAR PARTIDA</span></button><button class="btn danger" id="on-leave"><i data-i="home"></i> <span>SAIR DA SALA</span></button></div>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- RESULTADO ONLINE -->
+  <section id="s-onres" class="screen overlay">
+    <div class="panel wide">
+      <h1 id="or-title">VITÓRIA!</h1>
+      <div id="or-sub"></div>
+      <div id="or-table"></div>
+      <div id="or-coins"></div>
+      <div class="res-btns">
+        <button class="btn big primary" id="or-lobby"><i data-i="restart"></i> <span>VOLTAR À SALA</span></button>
+        <button class="btn danger" id="or-leave"><i data-i="home"></i> <span>SAIR DA SALA</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTADO DE RODADA -->
+  <section id="s-round" class="screen overlay">
+    <div class="panel">
+      <small id="rd-n">RODADA 1</small>
+      <h2 id="rd-title">VENCEDOR</h2>
+      <div id="rd-score"></div>
+      <div id="rd-sub"></div>
+      <div class="res-btns">
+        <button class="btn big primary" id="rd-next"><i data-i="play"></i> <span id="rd-next-t">PRÓXIMA RODADA</span></button>
+        <button class="btn danger" id="rd-end"><i data-i="home"></i> <span>ENCERRAR</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- VITÓRIA DA PARTIDA (FATALITY) -->
+  <section id="s-victory" class="screen overlay">
+    <div class="panel vic">
+      <small id="vic-sub">PARTIDA VENCIDA</small>
+      <h1 id="vic-title">VITÓRIA!</h1>
+      <button class="fat-btn" id="vic-fat" aria-label="Executar Fatality"><span class="fb-glow"></span><i data-i="skull"></i><b>FATALITY</b></button>
+      <div class="fat-eq" id="vic-eq"></div>
+      <div class="vic-hint" id="vic-hint"></div>
+      <div class="res-btns">
+        <button class="btn" id="vic-skip"><i data-i="play"></i> <span>CONTINUAR SEM FATALITY</span></button>
+        <button class="btn" id="vic-again"><i data-i="restart"></i> <span>NOVA PARTIDA</span></button>
+        <button class="btn" id="vic-menu"><i data-i="home"></i> <span>MENU</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FIM DA FATALITY -->
+  <section id="s-fatend" class="screen overlay noblock">
+    <div class="panel fe">
+      <small id="fe-sub"></small>
+      <h1 id="fe-name"></h1>
+      <div class="res-btns">
+        <button class="btn big primary" id="fe-cont"><i data-i="play"></i> <span>CONTINUAR</span></button>
+        <button class="btn" id="fe-again"><i data-i="restart"></i> <span>NOVA PARTIDA</span></button>
+        <button class="btn" id="fe-menu"><i data-i="home"></i> <span>MENU</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAUSA -->
+  <section id="s-pause" class="screen overlay">
+    <div class="panel">
+      <h2>PAUSADO</h2>
+      <button class="btn big primary" id="p-resume"><i data-i="play"></i> <span>CONTINUAR</span></button>
+      <button class="btn" id="p-restart"><i data-i="restart"></i> <span>REINICIAR PARTIDA</span></button>
+      <button class="btn" id="p-arena"><i data-i="arena"></i> <span>TROCAR ARENA</span></button>
+      <button class="btn" id="p-settings"><i data-i="sliders"></i> <span>CONFIGURAÇÕES</span></button>
+      <button class="btn danger" id="p-menu"><i data-i="home"></i> <span>MENU PRINCIPAL</span></button>
+    </div>
+  </section>
+
+  <!-- RESULTADO -->
+  <section id="s-result" class="screen overlay">
+    <div class="panel wide">
+      <h1 id="res-title">VITÓRIA!</h1>
+      <div id="res-sub"></div>
+      <div id="res-table"></div>
+      <div id="res-coins"></div>
+      <div class="res-btns">
+        <button class="btn big primary" id="r-again"><i data-i="restart"></i> <span>JOGAR NOVAMENTE</span></button>
+        <button class="btn" id="r-arena"><i data-i="arena"></i> <span>TROCAR ARENA</span></button>
+        <button class="btn" id="r-menu"><i data-i="home"></i> <span>MENU PRINCIPAL</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- HUD E CONTROLES -->
+  <div id="hud" class="hidden"><button id="btn-pause" aria-label="Pausar"><i data-i="pause"></i></button><div id="net-hud" class="net-ping hidden"></div></div>
+  <div id="ctrl" class="hidden">
+    <div class="pad" id="pad0">
+      <div class="joyzone" data-s="0"><div class="joyghost"></div><div class="joybase"><div class="joyknob"></div></div></div>
+      <div class="btns">
+        <button class="cb jump" data-s="0" data-a="jump"><i data-i="jump"></i></button>
+        <button class="cb atk" data-s="0" data-a="atk"><i data-i="sword"></i></button>
+        <button class="cb sp" data-s="0" data-a="sp"><i data-i="bolt"></i></button>
+        <button class="cb drop" data-s="0" data-a="drop"><i data-i="down"></i></button>
+        <button class="cb awk" data-s="0" data-a="awk"><i data-i="awk"></i></button>
+      </div>
+    </div>
+    <div class="pad" id="pad1">
+      <div class="joyzone" data-s="1"><div class="joyghost"></div><div class="joybase"><div class="joyknob"></div></div></div>
+      <div class="btns">
+        <button class="cb jump" data-s="1" data-a="jump"><i data-i="jump"></i></button>
+        <button class="cb atk" data-s="1" data-a="atk"><i data-i="sword"></i></button>
+        <button class="cb sp" data-s="1" data-a="sp"><i data-i="bolt"></i></button>
+        <button class="cb drop" data-s="1" data-a="drop"><i data-i="down"></i></button>
+        <button class="cb awk" data-s="1" data-a="awk"><i data-i="awk"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="rotate" class="hidden"><div class="rot-ico"><i data-i="rotate"></i></div><b>Gire o aparelho para o modo paisagem</b><button class="btn" id="rot-fs">Entrar em tela cheia</button></div>
+  <div id="toast"></div>
+</div>
+
+<script src="data.js"></script>
+<script src="sfx.js"></script>
+<script src="engine.js"></script>
+<script src="awakening.js"></script>
+<script src="fatality.js"></script>
+<script src="awk2.js"></script>
+<script src="ai.js"></script>
+<script src="render.js"></script>
+<script src="cosrender.js"></script>
+<script src="awkrender.js"></script>
+<script src="fatrender.js"></script>
+<script src="net.js"></script>
+<script src="ui.js"></script>
+<script src="netui.js"></script>
+</body>
+</html>
