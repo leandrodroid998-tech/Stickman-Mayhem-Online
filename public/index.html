@@ -494,6 +494,58 @@ body.kb #btn-react{opacity:.55}
 @keyframes btBlink{0%,100%{opacity:1}50%{opacity:.25}}
 .bt-mg{position:absolute;right:calc(2.2% + var(--sr,0px));bottom:calc(3% + var(--sb,0px));width:min(15vw,170px);height:auto;opacity:.95;filter:drop-shadow(0 .15em .3em rgba(0,0,0,.6))}
 
+/* ===== LOBBY ONLINE (estilo Fortnite): pódios, nomes, chat ===== */
+.on-body.wide{max-width:76em}
+.lb-top{display:flex;align-items:center;gap:1em;flex-wrap:wrap;padding:.55em 1em}
+.lb-code{display:flex;flex-direction:column;line-height:1.05}.lb-code small,.lb-count small{font-size:.62em;font-weight:800;letter-spacing:.25em;color:#a5b4fc}
+.lb-code b{font-size:2.1em;font-weight:900;letter-spacing:.28em;color:#fde68a;text-shadow:0 0 .6em rgba(250,204,21,.45);user-select:all}
+.lb-top-btns{display:flex;gap:.5em;flex:1;flex-wrap:wrap}
+.lb-count{display:flex;flex-direction:column;align-items:flex-end;line-height:1.05}.lb-count b{font-size:1.6em;font-weight:900;color:#fff}
+.lb-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:.7em;align-items:start}
+.lb-left{display:flex;flex-direction:column;gap:.6em;min-width:0}
+.lb-stage{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:.2em;padding:.4em .5em 0;border-radius:1.2em;overflow:hidden;border:1px solid rgba(196,181,253,.28);
+  background:radial-gradient(70% 90% at 50% 105%,rgba(236,72,153,.28),transparent 70%),radial-gradient(60% 70% at 50% 0%,rgba(99,102,241,.35),transparent 75%),linear-gradient(180deg,#120a33,#07041a);box-shadow:0 .8em 2.2em rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1)}
+.lb-stage::before{content:"";position:absolute;inset:-40% -20% auto;height:150%;background:conic-gradient(from 200deg at 50% 0%,transparent 0 8%,rgba(167,139,250,.16) 11%,transparent 15% 30%,rgba(34,211,238,.12) 33%,transparent 37% 60%,rgba(244,114,182,.14) 63%,transparent 67%);animation:lbsweep 9s ease-in-out infinite alternate;pointer-events:none}
+@keyframes lbsweep{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
+.lb-stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(180deg,transparent,rgba(124,58,237,.18));pointer-events:none}
+.pod{position:relative;display:flex;flex-direction:column;align-items:center;min-width:0;cursor:pointer;z-index:1;padding-top:2.1em}
+.pod.pop{animation:lbpop .55s cubic-bezier(.2,1.5,.4,1)}@keyframes lbpop{0%{transform:translateY(1.2em) scale(.7);opacity:0}100%{transform:none;opacity:1}}
+.pod-tag{position:relative;max-width:96%;display:flex;flex-direction:column;align-items:center;padding:.22em .8em .2em;border-radius:.6em;background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04)),rgba(10,7,32,.85);border:1px solid rgba(255,255,255,.18);border-left:.32em solid var(--pc);box-shadow:0 .3em .9em rgba(0,0,0,.45),0 0 1em color-mix(in srgb,var(--pc) 40%,transparent);z-index:2;line-height:1.1}
+.pod-tag b{font-size:.92em;font-weight:900;letter-spacing:.06em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:uppercase}
+.pod-tag small{font-size:.6em;font-weight:800;letter-spacing:.14em;color:#c4b5fd;min-height:1.1em}
+.pod.me .pod-tag{border-color:#fde68a;border-left-color:var(--pc)}.pod.me .pod-tag small{color:#fde68a}
+.pod-crown{position:absolute;top:-1.05em;left:50%;width:1.3em;height:1em;transform:translateX(-50%);background:#fde047;clip-path:polygon(0 100%,0 20%,25% 55%,50% 0,75% 55%,100% 20%,100% 100%);filter:drop-shadow(0 0 .3em rgba(250,204,21,.8))}
+.pod-fig{position:relative;width:100%;aspect-ratio:240/300;margin-top:-.1em}
+.pod-fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.pod-q{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:3.4em;font-weight:900;color:rgba(255,255,255,.12);animation:lbq 1.8s ease-in-out infinite}@keyframes lbq{50%{opacity:.4;transform:scale(1.08)}}
+.pod.empty .pod-fig canvas{display:none}.pod.empty .pod-q{display:flex}.pod.empty .pod-tag{opacity:.5;border-left-color:rgba(255,255,255,.2);box-shadow:none}.pod.empty .pod-tag b{font-size:.7em;letter-spacing:.16em}
+.pod-base{position:relative;width:94%;height:1.5em;margin-top:-.9em;border-radius:50%/60%;background:linear-gradient(180deg,#3b2a78,#1a1140);border:1px solid color-mix(in srgb,var(--pc) 60%,#fff 10%);box-shadow:0 .5em 1.2em rgba(0,0,0,.5),0 0 1.4em color-mix(in srgb,var(--pc) 55%,transparent),inset 0 .15em .3em rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;margin-bottom:.9em}
+.pod-ring{position:absolute;inset:-.25em -.3em;border-radius:50%/60%;border:2px solid var(--pc);opacity:.55;animation:lbring 2.4s ease-out infinite;pointer-events:none}
+@keyframes lbring{0%{transform:scale(.88);opacity:.7}100%{transform:scale(1.08);opacity:0}}
+.pod.empty .pod-ring{animation:none;opacity:0}.pod.empty .pod-base{box-shadow:none;border-style:dashed;border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.05)}
+.pod-base em{font-style:normal;font-size:.58em;font-weight:900;letter-spacing:.2em;color:#fde68a}.pod.empty .pod-base em{color:#a5b4fc}
+.pod:hover .pod-base{filter:brightness(1.25)}
+.pod-bubble{position:absolute;top:.2em;left:50%;transform:translate(-50%,.4em) scale(.85);max-width:150%;width:max-content;padding:.35em .7em;border-radius:.9em;background:#fff;color:#1b1340;font-size:.78em;font-weight:800;line-height:1.15;z-index:5;opacity:0;pointer-events:none;box-shadow:0 .3em .9em rgba(0,0,0,.45);transition:opacity .2s,transform .2s;text-align:center;word-break:break-word}
+.pod-bubble::after{content:"";position:absolute;left:50%;bottom:-.4em;width:.8em;height:.8em;background:#fff;transform:translateX(-50%) rotate(45deg)}
+.pod-bubble.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.lb-right{display:flex;flex-direction:column;gap:.5em;padding:.6em .7em;height:clamp(250px,52vh,440px);min-width:0}
+.lb-tabs{display:flex;gap:.4em}.lb-tab{flex:1;font:inherit;font-weight:900;letter-spacing:.14em;font-size:.78em;color:#c4b5fd;background:rgba(255,255,255,.06);border:1px solid rgba(196,181,253,.2);border-radius:.7em;padding:.5em .6em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5em}
+.lb-tab.sel{color:#fff;background:linear-gradient(135deg,#8b5cf6,#c026d3);border-color:rgba(255,255,255,.5)}
+.lb-tab em{font-style:normal;background:#ef4444;color:#fff;border-radius:1em;font-size:.85em;padding:0 .5em;min-width:1.2em;text-align:center}
+.lb-pane{flex:1;min-height:0;display:flex;flex-direction:column;gap:.45em;overflow-y:auto}
+.lb-log{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;gap:.28em;padding:.5em;border-radius:.8em;background:rgba(0,0,0,.3);border:1px solid rgba(196,181,253,.14);touch-action:pan-y;scrollbar-width:thin}
+.lm{font-size:.86em;line-height:1.25;word-break:break-word;animation:lbmsg .25s ease}@keyframes lbmsg{from{opacity:0;transform:translateY(.4em)}}
+.lm b{margin-right:.45em;font-weight:900;text-transform:uppercase;letter-spacing:.03em;font-size:.92em}.lm.mine span{color:#fff}.lm span{color:#e5e7eb}
+.lm.sys{text-align:center;font-size:.72em;font-weight:700;letter-spacing:.06em;color:#a5b4fc;opacity:.85;padding:.1em 0}
+.lb-emo{display:flex;gap:.3em;flex-wrap:wrap}.lb-e{font:inherit;font-weight:900;font-size:.82em;line-height:1;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(196,181,253,.22);border-radius:2em;padding:.35em .65em;cursor:pointer}.lb-e:active{transform:scale(.92)}
+.lb-in{display:flex;gap:.45em}.lb-in input{flex:1;min-width:0;font:inherit;font-weight:700;color:#fff;background:rgba(0,0,0,.4);border:2px solid rgba(196,181,253,.35);border-radius:.8em;padding:.5em .8em;outline:none}.lb-in input:focus{border-color:#a78bfa}
+.lb-in .btn{padding:.5em .9em}.lb-in .btn .ic{width:1.1em;height:1.1em}
+body.cust-net #cp-tog{display:none}
+@media (max-width:760px){.lb-grid{grid-template-columns:1fr}.lb-right{height:clamp(240px,46vh,400px)}.lb-code b{font-size:1.6em}}
+@media (max-height:480px){.lb-stage{font-size:.82em}.lb-top{padding:.35em .8em}.lb-code b{font-size:1.5em}.pod{padding-top:1.9em}}
+.lb-left .on-btns{flex-wrap:nowrap;gap:.5em;justify-content:stretch}.lb-left .on-btns .btn{white-space:nowrap;padding:.75em .9em;font-size:.88em}.lb-left .on-btns #on-start{flex:1}
+.lb-left .on-status{font-size:.9em;min-height:1.2em}
+
 </style>
 </head>
 <body>
@@ -565,7 +617,7 @@ body.kb #btn-react{opacity:.55}
 
   <!-- PERSONALIZAR -->
   <section id="s-custom" class="screen">
-    <header><button class="btn back" data-go="menu"><i data-i="back"></i></button><h2>PERSONALIZAR</h2><div class="coins-tag"><i data-i="coin"></i> <span class="coins-val">0</span></div></header>
+    <header><button class="btn back" id="cu-back"><i data-i="back"></i></button><h2>PERSONALIZAR</h2><div class="coins-tag"><i data-i="coin"></i> <span class="coins-val">0</span></div></header>
     <div class="custom-body">
       <div class="prev-wrap">
         <div class="cp-tog" id="cp-tog"></div>
@@ -608,7 +660,7 @@ body.kb #btn-react{opacity:.55}
   <!-- ONLINE -->
   <section id="s-online" class="screen">
     <header><button class="btn back" id="on-back"><i data-i="back"></i></button><h2>ONLINE</h2><div class="net-ping hidden" id="on-ping"></div></header>
-    <div class="scroll"><div class="on-body">
+    <div class="scroll"><div class="on-body" id="on-body">
       <div id="on-home">
         <div class="glass on-name"><label for="on-name">SEU NOME</label><input id="on-name" maxlength="12" autocomplete="off" spellcheck="false" placeholder="JOGADOR"></div>
         <div class="on-cols">
@@ -622,17 +674,32 @@ body.kb #btn-react{opacity:.55}
         </details>
       </div>
       <div id="on-room" class="hidden">
-        <div class="glass on-code-box"><div class="sec-title">CÓDIGO DA SALA</div><div class="on-code-big" id="on-code-big">------</div>
-          <div class="on-code-btns"><button class="btn" id="on-copy"><i data-i="copy"></i> <span>COPIAR CÓDIGO</span></button><button class="btn" id="on-share"><i data-i="users"></i> <span>CONVIDAR</span></button></div></div>
-        <div class="glass"><div class="sec-title">JOGADORES <span id="on-count">1/4</span></div><div id="on-players" class="on-players"></div></div>
-        <div class="glass" id="on-opts"><div class="sec-title">PARTIDA</div>
-          <div class="opt"><label>Arena</label><div class="chips" id="on-o-arena"></div></div>
-          <div class="opt"><label>Vidas</label><div class="chips" id="on-o-lives"></div></div>
-          <div class="opt"><label>Armas</label><div class="chips" id="on-o-weap"></div></div>
-          <div class="opt"><label>AWAKENING</label><div class="chips" id="on-o-awk"></div></div>
-          <div class="opt"><label>FATALITY</label><div class="chips" id="on-o-fat"></div></div></div>
-        <div class="on-status" id="on-status"></div>
-        <div class="on-btns"><button class="btn big primary" id="on-start"><i data-i="swords"></i> <span>INICIAR PARTIDA</span></button><button class="btn danger" id="on-leave"><i data-i="home"></i> <span>SAIR DA SALA</span></button></div>
+        <div class="glass lb-top">
+          <div class="lb-code"><small>CÓDIGO DA SALA</small><b id="on-code-big">------</b></div>
+          <div class="lb-top-btns"><button class="btn" id="on-copy"><i data-i="copy"></i> <span>COPIAR</span></button><button class="btn" id="on-share"><i data-i="users"></i> <span>CONVIDAR</span></button></div>
+          <div class="lb-count"><small>JOGADORES</small><b id="on-count">1/4</b></div>
+        </div>
+        <div class="lb-grid">
+          <div class="lb-left">
+            <div class="lb-stage" id="lb-stage"></div>
+            <div class="on-status" id="on-status"></div>
+            <div class="on-btns"><button class="btn" id="lb-custom"><i data-i="palette"></i> <span>PERSONALIZAR</span></button><button class="btn big primary" id="on-start"><i data-i="swords"></i> <span>INICIAR PARTIDA</span></button><button class="btn danger" id="on-leave"><i data-i="home"></i> <span>SAIR</span></button></div>
+          </div>
+          <div class="glass lb-right">
+            <div class="lb-tabs"><button class="lb-tab sel" data-t="chat"><span>CHAT</span><em id="lb-unread" class="hidden">0</em></button><button class="lb-tab" data-t="opts"><span>PARTIDA</span></button></div>
+            <div class="lb-pane" id="lb-chat">
+              <div class="lb-log" id="lb-log" aria-live="polite"></div>
+              <div class="lb-emo" id="lb-emo"></div>
+              <form class="lb-in" id="lb-form" autocomplete="off"><input id="lb-msg" maxlength="140" placeholder="Digite uma mensagem…" autocomplete="off" spellcheck="false" enterkeyhint="send"><button class="btn primary" id="lb-send" type="submit"><i data-i="play"></i></button></form>
+            </div>
+            <div class="lb-pane hidden" id="lb-opts"><div id="on-opts">
+              <div class="opt"><label>Arena</label><div class="chips" id="on-o-arena"></div></div>
+              <div class="opt"><label>Vidas</label><div class="chips" id="on-o-lives"></div></div>
+              <div class="opt"><label>Armas</label><div class="chips" id="on-o-weap"></div></div>
+              <div class="opt"><label>AWAKENING</label><div class="chips" id="on-o-awk"></div></div>
+              <div class="opt"><label>FATALITY</label><div class="chips" id="on-o-fat"></div></div></div></div>
+          </div>
+        </div>
       </div>
     </div></div>
   </section>
@@ -754,7 +821,7 @@ body.kb #btn-react{opacity:.55}
 'use strict';
 const GFX = {low: false}; // gráficos: Baixo = menos partículas/animações/resolução
 /* STICK MAYHEM — dados: armas, arenas, cosméticos, desafios */
-const WORLD_W = 1280, WORLD_H = 720, VERSION = 'v1.5.0';
+const WORLD_W = 1280, WORLD_H = 720, VERSION = 'v1.6.0';
 const GRAV = 2300;
 
 /* ---------- ícones vetoriais (traço 24x24, estilo linha) ---------- */
@@ -4991,6 +5058,8 @@ function netCode() { let s = ''; for (let i = 0; i < 6; i++) s += NET_ALPHA[(Mat
 function netNormCode(s) { return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6); }
 function netRid() { return 'c' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
 function netClean(s, n) { return String(s == null ? '' : s).replace(/[\u0000-\u001f<>&"'`\\]/g, '').trim().slice(0, n || 12); }
+// texto de chat: só remove caracteres de controle (a interface usa textContent, então &, <, ' são seguros)
+function netTxt(s, n) { return String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f\u2028\u2029]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n || 140); }
 const NET_HEX = /^#[0-9a-fA-F]{6}$/;
 // o que vem da rede nunca é confiado: só chaves conhecidas, com valores válidos
 function netSkin(s, slot) {
@@ -5092,6 +5161,29 @@ const Net = {
     clearInterval(this._iv); clearTimeout(this._to);
     this.restoreSfx();
     this.role = null; this.code = ''; this.pid = -1; this.players = []; this.phase = 'idle'; this.sig = null; this.links = {}; this.hostLink = null; this.inputs = {}; this.ev = []; this.ping = 0; this.match = null; this.snap = null;
+    this.chat = []; this.chatN = 0;
+  },
+  // ---------- chat do lobby + skin ao vivo
+  chatOk() { return !!this.role && (this.phase === 'lobby' || this.phase === 'result'); },
+  pushChat(pid, t) {             // só o host cria mensagens (numeradas); os clientes apenas recebem
+    const p = this.players.find(x => x.pid === pid), e = {n: ++this.chatN, pid, name: p ? p.name : '', c: p ? p.color : '', t: netTxt(t, 140), sys: pid < 0};
+    if (!e.t) return; this.addChat(e); this.bcast({k: 'chat', e});
+  },
+  addChat(e, quiet) {
+    if (!e || typeof e !== 'object') return; const n = e.n | 0; if (n <= 0 || this.chat.some(x => x.n === n)) return;
+    const o = {n, pid: e.pid | 0, name: netClean(e.name, 12), c: NET_HEX.test(e.c) ? e.c : '#a5b4fc', t: netTxt(e.t, 140), sys: !!e.sys}; if (!o.t) return;
+    this.chat.push(o); this.chat.sort((a, b) => a.n - b.n); while (this.chat.length > 80) this.chat.shift();
+    if (n > this.chatN) this.chatN = n; this.emit('chat', o, quiet);
+  },
+  sendChat(t) {
+    t = netTxt(t, 140); if (!t || !this.chatOk()) return false;
+    if (this.role === 'host') this.pushChat(0, t); else if (this.hostLink) this.hostLink.send({k: 'chat', t});
+    return true;
+  },
+  setSkin(s) {                   // skin nova (editada no lobby) → todos veem ao vivo
+    if (!this.role || this.phase === 'play' || this.phase === 'connecting') return; this.skin = s;
+    const me = this.players.find(p => p.pid === this.pid); if (me) me.skin = netSkin(s, me.pid);
+    if (this.role === 'host') { this.roomSoon(); this.emit('room'); } else if (this.hostLink) { clearTimeout(this._skT); this._skT = setTimeout(() => { if (this.role === 'client' && this.hostLink && this.phase !== 'play') this.hostLink.send({k: 'sk', skin: this.skin}); }, 90); this.emit('room'); }
   },
   mePlayer() { return this.players.find(p => p.pid === this.pid); },
 
@@ -5152,6 +5244,7 @@ const Net = {
         L.pid = pid; const p = this.mk(pid, netClean(m.name, 12) || 'JOGADOR ' + (pid + 1), m.skin, 0); this.players.push(p); this.players.sort((a, b) => a.pid - b.pid);
         L.send({k: 'wel', pid, code: this.code, v: VERSION});
         this.sendRoom(); this.emit('room'); SFX.play('select');
+        L.send({k: 'chath', log: this.chat.slice(-30)}); this.pushChat(-1, p.name + ' entrou na sala');
         break;
       }
       case 'pg': L.send({k: 'pn', t: m.t}, true); if (m.p !== undefined) { const p = this.players.find(x => x.pid === L.pid); if (p) p.ping = m.p | 0; } break;
@@ -5162,6 +5255,8 @@ const Net = {
         if (m.j > c.j) { inp.jumpP = true; c.j = m.j; } if (m.s > c.s) { inp.spP = true; c.s = m.s; } if (m.d > c.d) { inp.dropP = true; c.d = m.d; } if (m.a > c.a) { inp.awkP = true; c.a = m.a; }
         break;
       }
+      case 'sk': { if (this.phase === 'play') break; const p = this.players.find(x => x.pid === L.pid); if (!p) break; p.skin = netSkin(m.skin, p.pid); this.roomSoon(); this.emit('room'); break; }
+      case 'chat': { if (!this.chatOk()) break; const now = performance.now(); if (now - (L.chT || 0) < 500) break; L.chT = now; this.pushChat(L.pid, m.t); break; }
       case 'rx': if (this.phase === 'play' && this.match) { const f = this.match.fighters.find(x => x.netPid === L.pid); if (f && f.alive && typeof reactTry === 'function') reactTry(f, m.i | 0); } break;
       case 'bye': L.fail('bye'); break;
     }
@@ -5176,12 +5271,13 @@ const Net = {
       if (f && !f.out) { f.lives = 0; f.hp = 0; f.out = true; f.alive = false; f.ragdoll = true; f.input = newInput(); this.match.fx.text(f.cx, f.cy - 40, 'SAIU', '#94a3b8'); }
       delete this.inputs[p.pid];
     }
-    this.emit('left', p, why); this.sendRoom(); this.emit('room');
+    this.emit('left', p, why); this.sendRoom(); this.emit('room'); this.pushChat(-1, p.name + ' saiu da sala');
   },
   sendRoom() {
     const o = {k: 'room', players: this.players.map(p => ({pid: p.pid, name: p.name, skin: p.skin, color: p.color, ping: p.ping})), opts: this.opts, phase: this.phase, code: this.code};
     for (const k in this.links) if (this.links[k].pid >= 0) this.links[k].send(o);
   },
+  roomSoon() { const now = performance.now(); if (now - (this._rsT || 0) >= 80) { this._rsT = now; this.sendRoom(); } else if (!this._rsTm) this._rsTm = setTimeout(() => { this._rsTm = 0; this._rsT = performance.now(); if (this.role === 'host') this.sendRoom(); }, 90); },
   setOpts(o) { Object.assign(this.opts, o); if (this.role === 'host') { this.sendRoom(); this.emit('room'); } },
   bcast(o, unrel) { for (const k in this.links) { const L = this.links[k]; if (L.pid >= 0) L.send(o, unrel); } },
   canStart() { return this.role === 'host' && this.phase === 'lobby' && this.players.length >= 2; },
@@ -5306,6 +5402,8 @@ const Net = {
       case 'wel': gotCb(); clearTimeout(this._to); this.pid = m.pid; this.phase = 'lobby'; this.setStatus('Conectado à sala ' + this.code); if (this.sig) { /* sinalização não é mais necessária */ this.sig.close(); }
         clearInterval(this._iv); this._iv = setInterval(() => this.clientWatch(), 1000); break;
       case 'rej': gotCb(); this.fatal(m.why || 'Entrada recusada.'); break;
+      case 'chat': this.addChat(m.e); break;
+      case 'chath': (Array.isArray(m.log) ? m.log.slice(-30) : []).forEach(e => this.addChat(e, true)); break;
       case 'room': {
         this.players = (m.players || []).map(p => ({pid: p.pid, name: netClean(p.name, 12), skin: netSkin(p.skin, p.pid), color: NET_HEX.test(p.color) ? p.color : NET_COLORS[p.pid & 3], ping: p.ping | 0}));
         this.opts = Object.assign({}, this.opts, m.opts || {});
@@ -6402,6 +6500,7 @@ function frame(ts) {
   Controls.poll();
   const sc = app.scene;
   if (app.inCustom) { renderPreview(app.t, dt); }
+  if (typeof lbFrame === 'function') lbFrame(dt);
   if (sc) {
     if (app.state !== 'paused' && app.state !== 'result' && app.state !== 'round') {
       app.acc += dt * (sc.timeScale || 1);
@@ -6420,7 +6519,7 @@ function frame(ts) {
 }
 
 // ---------- início ----------
-$('#ver').textContent = 'STICK MAYHEM ' + VERSION + ' — REACTIONS & ONLINE UPDATE';
+$('#ver').textContent = 'STICK MAYHEM ' + VERSION + ' — LOBBY REACTIONS & ONLINE UPDATE CHAT UPDATE';
 applySettings(); resize(); newMenuScene(); updCoins();
 if (!isFinite(save.coins)) save.coins = 0;
 requestAnimationFrame(frame);
@@ -6497,7 +6596,7 @@ function onBusy(b) { ['#on-create', '#on-join'].forEach(s => { $(s).disabled = b
 function onName() { return ($('#on-name').value || '').replace(/[<>&"'`\\]/g, '').trim().slice(0, 12) || 'JOGADOR'; }
 // skin enviada à sala: a do jogador + a Fatality equipada (só vale se for dele)
 function onlineSkin() { const id = save.eq.fat; return Object.assign(mySkin(0), {fat: FATS[id] && owned('fat', id) ? id : 'iron'}); }
-function onlineView(room) { $('#on-home').classList.toggle('hidden', room); $('#on-room').classList.toggle('hidden', !room); }
+function onlineView(room) { $('#on-home').classList.toggle('hidden', room); $('#on-room').classList.toggle('hidden', !room); $('#on-body').classList.toggle('wide', !!room); if (room) lbBuild(); }
 function onlineOpen() {
   const q = new URLSearchParams(location.search).get('sala');
   $('#on-name').value = save.net.name || '';
@@ -6515,12 +6614,12 @@ $('#on-code').addEventListener('keydown', e => { if (e.key === 'Enter') $('#on-j
 ['#on-name', '#on-h', '#on-p', '#on-path'].forEach(s => $(s).addEventListener('keydown', e => e.stopPropagation()));
 $('#on-create').onclick = () => {
   SFX.resume(); SFX.play('click'); onSaveAdv(); if (!Net.supported()) { onMsg('WebRTC indisponível neste navegador.', 'err'); return; }
-  onBusy(true); onMsg('Criando sala…'); Net.host(onName(), onlineSkin());
+  onBusy(true); onMsg('Criando sala…'); { const sk = onlineSkin(); lbSkinKey = JSON.stringify(sk); Net.host(onName(), sk); lbChatReset(); }
 };
 $('#on-join').onclick = () => {
   SFX.resume(); SFX.play('click'); onSaveAdv(); if (!Net.supported()) { onMsg('WebRTC indisponível neste navegador.', 'err'); return; }
   const c = netNormCode($('#on-code').value); if (c.length !== 6) { onMsg('Digite o código de 6 caracteres.', 'err'); return; }
-  onBusy(true); onMsg('Conectando…'); Net.join(c, onName(), onlineSkin());
+  onBusy(true); onMsg('Conectando…'); { const sk = onlineSkin(); lbSkinKey = JSON.stringify(sk); Net.join(c, onName(), sk); lbChatReset(); }
 };
 function onlineLeave() {
   SFX.play('click'); Net.leave(true);
@@ -6550,18 +6649,7 @@ function onlineRender() {
   $('#on-code-big').textContent = Net.code || '------';
   const host = Net.role === 'host', P = Net.players;
   $('#on-count').textContent = P.length + '/4';
-  const box = $('#on-players'); box.innerHTML = '';
-  for (let i = 0; i < NET_MAX; i++) {
-    const p = P.find(x => x.pid === i), d = document.createElement('div');
-    if (!p) { d.className = 'on-pl empty'; d.textContent = 'Aguardando jogador…'; }
-    else {
-      d.className = 'on-pl'; d.style.setProperty('--pc', p.color);
-      const me = p.pid === Net.pid, ping = p.pid === 0 ? '' : (me ? (Net.ping ? Net.ping + ' ms' : '') : (p.ping ? p.ping + ' ms' : ''));
-      d.innerHTML = '<i class="dot"></i><b></b>' + (p.pid === 0 ? ico('crown') : '') + '<small></small>';
-      d.querySelector('b').textContent = p.name + (me ? ' (você)' : ''); d.querySelector('small').textContent = ping || (p.pid === 0 ? 'host' : '');
-    }
-    box.appendChild(d);
-  }
+  lbSync();
   const o = Net.opts, ob = $('#on-opts'); ob.classList.toggle('ro', !host);
   const set = (id, items, cur, key) => chips($(id), items, cur, v => { if (!host) return; Net.setOpts({[key]: v}); save.net[key] = v; persist(); });
   set('#on-o-arena', ARENA_IDS.filter(a => a !== 'training').map(id => [id, ARENAS[id].name]), o.arena, 'arena');
@@ -6578,7 +6666,90 @@ $('#on-start').onclick = () => {
   const cfg = Net.hostStart(); if (cfg) { app.series = null; startGame(cfg); }
 };
 
+// ================= LOBBY ESTILO FORTNITE: pódios com bonecos ao vivo + chat =================
+const LB = {built: false, slots: [], key: '', tab: 'chat', unread: 0};
+const LB_EMO = ['😂', '🔥', '💀', '👏', '😎', '🤡', 'GG', 'BORA!'];
+function lbBuild() {
+  if (LB.built) return; LB.built = true;
+  const st = $('#lb-stage');
+  for (let i = 0; i < NET_MAX; i++) {
+    const d = document.createElement('div'); d.className = 'pod empty'; d.style.setProperty('--pc', NET_COLORS[i]);
+    d.innerHTML = '<div class="pod-bubble"></div><div class="pod-tag"><i class="pod-crown"></i><b></b><small></small></div><div class="pod-fig"><canvas width="240" height="300"></canvas><div class="pod-q">?</div></div><div class="pod-base"><span class="pod-ring"></span><em></em></div>';
+    st.appendChild(d);
+    const S = {el: d, cv: d.querySelector('canvas'), name: d.querySelector('.pod-tag b'), sub: d.querySelector('.pod-tag small'), crown: d.querySelector('.pod-crown'), bub: d.querySelector('.pod-bubble'), baseTx: d.querySelector('.pod-base em'),
+      m: null, key: '', has: false, cele: 0, bubT: 0};
+    d.onclick = () => {
+      if (!S.has) { SFX.play('click'); $('#on-share').click(); return; }
+      if (Net.pid === i) { $('#lb-custom').click(); return; }
+      S.cele = 2.2; SFX.play('click');
+    };
+    LB.slots.push(S);
+  }
+  const emo = $('#lb-emo'); emo.innerHTML = '';
+  LB_EMO.forEach(t => { const b = document.createElement('button'); b.type = 'button'; b.className = 'lb-e'; b.textContent = t; b.onclick = () => { if (Net.sendChat(t)) SFX.play('click'); }; emo.appendChild(b); });
+  $$('.lb-tab').forEach(b => b.onclick = () => { SFX.play('click'); lbTab(b.dataset.t); });
+  $('#lb-msg').addEventListener('keydown', e => e.stopPropagation());
+  $('#lb-msg').addEventListener('keyup', e => e.stopPropagation());
+  $('#lb-form').onsubmit = e => { e.preventDefault(); const i = $('#lb-msg'), t = i.value.trim(); if (!t) return; if (Net.sendChat(t)) { i.value = ''; SFX.play('click'); } else toast('Não dá para enviar agora.'); };
+  $('#lb-custom').onclick = () => { SFX.play('click'); lbOpenCustom(); };
+  lbChatReset();
+}
+function lbTab(t) {
+  LB.tab = t; $$('.lb-tab').forEach(b => b.classList.toggle('sel', b.dataset.t === t));
+  $('#lb-chat').classList.toggle('hidden', t !== 'chat'); $('#lb-opts').classList.toggle('hidden', t !== 'opts');
+  if (t === 'chat') { LB.unread = 0; lbUnread(); const l = $('#lb-log'); l.scrollTop = l.scrollHeight; }
+}
+function lbUnread() { const u = $('#lb-unread'); u.textContent = LB.unread > 9 ? '9+' : LB.unread; u.classList.toggle('hidden', !LB.unread); }
+function lbOpenCustom() { custP = 0; document.body.classList.add('cust-net'); go('custom'); }
+// atualiza os pódios (nomes, vazio/ocupado, skin) a partir da sala
+function lbSync() {
+  if (!LB.built) return;
+  for (let i = 0; i < NET_MAX; i++) {
+    const S = LB.slots[i], p = Net.players.find(x => x.pid === i);
+    if (!p) { if (S.has) { S.has = false; S.key = ''; } S.el.classList.add('empty'); S.el.classList.remove('me', 'host'); S.name.textContent = 'AGUARDANDO…'; S.sub.textContent = ''; S.crown.style.display = 'none'; S.baseTx.textContent = i ? 'CONVIDAR' : ''; continue; }
+    if (!S.has) { S.has = true; S.el.classList.remove('pop'); void S.el.offsetWidth; S.el.classList.add('pop'); S.cele = 2.4; }
+    const me = p.pid === Net.pid, ping = p.pid === 0 ? 'HOST' : (me ? (Net.ping ? Net.ping + ' ms' : '') : (p.ping ? p.ping + ' ms' : ''));
+    S.el.classList.remove('empty'); S.el.classList.toggle('me', me); S.el.classList.toggle('host', p.pid === 0); S.el.style.setProperty('--pc', p.color);
+    S.name.textContent = p.name; S.sub.textContent = me ? 'VOCÊ' + (p.pid && ping ? ' · ' + ping : '') : ping; S.crown.style.display = p.pid === 0 ? '' : 'none'; S.baseTx.textContent = me ? 'EDITAR' : '';
+    const key = JSON.stringify(p.skin);
+    if (key !== S.key) { const first = !S.key; S.key = key; if (!S.m) S.m = new Match({mode: 'preview', arena: 'training'}, {skin: Object.assign({}, p.skin), shake: false}); S.m.fighters[0].skin = Object.assign({}, p.skin); if (!first) { S.cele = 2.4; S.flash = 0.6; } }
+  }
+}
+// desenha os bonecos (chamado a cada quadro pelo laço principal)
+function lbFrame(dt) {
+  if (!LB.built || !onlineScreenActive() || $('#on-room').classList.contains('hidden')) return;
+  for (let i = 0; i < NET_MAX; i++) {
+    const S = LB.slots[i]; if (!S.has || !S.m) continue;
+    const f = S.m.fighters[0], c = S.cv, g = c.getContext('2d'), p = Net.players.find(x => x.pid === i); if (!p) continue;
+    f.input.mx = 0; if (Math.abs(f.x - 640) > 3) f.x += (640 - f.x) * 0.1; f.facing = i < 2 ? 1 : -1;
+    S.cele = Math.max(0, S.cele - dt); f.celebrate = S.cele > 0; f.winAnim = Math.max(0, WIN_IDS.indexOf(p.skin.win));
+    S.m.update(DT);
+    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
+    const s = 2.45; g.setTransform(s, 0, 0, s, c.width / 2 - f.x * s, c.height * 0.93 - 600 * s);
+    if (S.flash > 0) { S.flash -= dt; g.fillStyle = 'rgba(255,255,255,' + Math.min(0.5, S.flash).toFixed(2) + ')'; g.beginPath(); g.ellipse(f.x, 540, 70, 100, 0, 0, 6.283); g.fill(); }
+    drawFighter(g, f, app.t, false); g.setTransform(1, 0, 0, 1, 0, 0);
+    if (S.bubT > 0) { S.bubT -= dt; if (S.bubT <= 0) S.bub.classList.remove('show'); }
+  }
+}
+function lbChatAdd(e, quiet) {
+  const l = $('#lb-log'), near = l.scrollHeight - l.scrollTop - l.clientHeight < 60, d = document.createElement('div');
+  if (e.sys) { d.className = 'lm sys'; d.textContent = e.t; }
+  else { d.className = 'lm' + (e.pid === Net.pid ? ' mine' : ''); const b = document.createElement('b'); b.style.color = e.c; b.textContent = e.name; const t = document.createElement('span'); t.textContent = e.t; d.appendChild(b); d.appendChild(t); }
+  l.appendChild(d); while (l.children.length > 80) l.removeChild(l.firstChild);
+  if (near || e.pid === Net.pid) l.scrollTop = l.scrollHeight;
+  if (e.sys || quiet) return;
+  const S = LB.slots[e.pid]; if (S && S.has) { S.bub.textContent = e.t.length > 46 ? e.t.slice(0, 45) + '…' : e.t; S.bub.classList.remove('show'); void S.bub.offsetWidth; S.bub.classList.add('show'); S.bubT = 4; }
+  if (e.pid !== Net.pid) { SFX.play('select'); if (LB.tab !== 'chat' || !onlineScreenActive()) { LB.unread++; lbUnread(); } }
+}
+function lbChatReset() { LB.unread = 0; lbUnread(); const l = $('#lb-log'); if (l) l.innerHTML = ''; (Net.chat || []).forEach(e => lbChatAdd(e, true)); }
+// skin editada → envia à sala (só se mudou)
+let lbSkinKey = '';
+function lbPushSkin() { if (!Net.role || Net.phase === 'play' || Net.phase === 'connecting') return; const s = onlineSkin(), k = JSON.stringify(s); if (k === lbSkinKey) return; lbSkinKey = k; Net.setSkin(s); }
+{ const ce = custEquip; custEquip = function () { const r = ce.apply(this, arguments); if (r && document.body.classList.contains('cust-net')) lbPushSkin(); return r; }; }
+$('#cu-back').onclick = () => { SFX.play('click'); if (document.body.classList.contains('cust-net')) { document.body.classList.remove('cust-net'); lbPushSkin(); go('online'); } else go('menu'); };
+
 // ---- eventos do Net
+Net.on.chat = (e, q) => { if (LB.built) lbChatAdd(e, q); };
 Net.on.status = t => { if (onlineScreenActive() && !$('#on-home').classList.contains('hidden')) onMsg(t); };
 Net.on.room = () => {
   if (app.state === 'result' && Net.phase === 'lobby') { onlineToLobby(); return; }
@@ -6595,7 +6766,7 @@ Net.on.lost = msg => {
   onlineView(false); onBusy(false); onMsg(msg, 'err'); toast(msg);
 };
 Net.on.left = (p) => { toast(p.name + ' saiu da sala'); };
-Net.on.start = cfg => { app.series = null; startGame(cfg); };
+Net.on.start = cfg => { document.body.classList.remove('cust-net'); app.inCustom = false; app.series = null; startGame(cfg); };
 Net.on.fat = m => { app.pendingEnd = null; app.waitEnd = false; onlineStartFat(m.win | 0, m.vic | 0, m.id, null); };
 Net.on.end = res => {
   if (app.fatOn && app.fatOn.started && !app.fatOn.done) { app.pendingEnd = res; return; }   // espera a Fatality terminar
