@@ -552,6 +552,21 @@ body.boss0 #pad0 .cb.awk,body.boss1 #pad1 .cb.awk{display:flex}
 .cb[data-l]::after{content:attr(data-l);position:absolute;left:50%;bottom:-.1em;transform:translate(-50%,0);font:800 .5em/1 system-ui,sans-serif;letter-spacing:.02em;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000,0 0 3px #000;pointer-events:none;white-space:nowrap}
 .cb.cdn{filter:saturate(.3) brightness(.7)}
 .cb.awk[data-l]{opacity:1}
+#on-opts.ro .bossrow.mine .chip{pointer-events:auto;opacity:1}
+#on-opts .opt.gone{display:none}
+
+.on-cols{grid-template-columns:repeat(auto-fit,minmax(15em,1fr))}
+.on-lan-btns{display:flex;flex-direction:column;gap:.5em}
+.lan-modal{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;background:rgba(5,4,20,.82);padding:.6em}
+.lan-modal.hidden{display:none}
+.lan-box{width:min(34em,100%);max-height:100%;overflow:auto;display:flex;flex-direction:column;gap:.55em;padding:.9em 1em}
+.lan-box p{margin:0;opacity:.85;font-size:.85em}
+.lan-box textarea{width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);color:#e0e7ff;border:1px solid rgba(255,255,255,.2);border-radius:.5em;padding:.5em;font:12px/1.3 monospace;resize:none;word-break:break-all}
+#lan-out{display:flex;flex-direction:column;align-items:center;gap:.5em}
+#lan-qr{width:min(15em,60vw);height:auto;image-rendering:pixelated;background:#fff;border-radius:.4em}
+#lan-vid{width:100%;max-height:30vh;border-radius:.5em;background:#000}
+.lan-row{display:flex;gap:.5em;flex-wrap:wrap;justify-content:center}
+@media (max-height:480px){#lan-qr{width:7em}.lan-box{flex-direction:row;flex-wrap:wrap}.lan-box>*{flex:1 1 45%}}
 
 </style>
 </head>
@@ -601,12 +616,15 @@ body.boss0 #pad0 .cb.awk,body.boss1 #pad1 .cb.awk{display:flex}
         <button class="mode-card" data-mode="duel_cpu"><div class="mi"><i data-i="bot"></i></div><div class="mt"><b>DUELO vs CPU</b><small>1v1 contra a IA · AWAKENING opcional</small></div><span class="mk"><i data-i="check"></i></span></button>
         <button class="mode-card" data-mode="duel_local"><div class="mi"><i data-i="users"></i></div><div class="mt"><b>DUELO LOCAL</b><small>2 jogadores no mesmo aparelho</small></div><span class="mk"><i data-i="check"></i></span></button>
         <button class="mode-card" data-mode="chaos"><div class="mi"><i data-i="burst"></i></div><div class="mt"><b>CHAOS ARENA</b><small>Você + 3 bots · armas do céu</small></div><span class="mk"><i data-i="check"></i></span></button>
+        <button class="mode-card" data-mode="boss"><div class="mi"><i data-i="skull"></i></div><div class="mt"><b>VS BOSS</b><small>Derrote um boss com super poderes</small></div><span class="mk"><i data-i="check"></i></span></button>
       </div>
       <div class="play-side">
         <div class="glass">
           <div class="sec-title">2 · ARENA <span id="arena-name"></span></div>
           <div class="chips arena-chips" id="opt-arena"></div>
           <div class="opt" id="opt-diff-row"><label>Dificuldade</label><div class="chips" id="opt-diff"></div></div>
+          <div class="opt" id="opt-bosslives-row"><label>Suas vidas</label><div class="chips" id="opt-bosslives"></div></div>
+          <div class="opt" id="opt-bosstype-row"><label>Boss</label><div class="chips" id="opt-bosstype"></div></div>
           <div class="opt" id="opt-format-row"><label>Formato</label><div class="chips" id="opt-format"></div></div>
           <div class="mode-info" id="mode-info"></div>
         </div>
@@ -673,6 +691,7 @@ body.boss0 #pad0 .cb.awk,body.boss1 #pad1 .cb.awk{display:flex}
         <div class="on-cols">
           <div class="glass on-card"><div class="sec-title">CRIAR SALA</div><p>Gere um código de convite e chame até 3 amigos (4 jogadores no total).</p><button class="btn big primary" id="on-create"><i data-i="globe"></i> <span>CRIAR SALA</span></button></div>
           <div class="glass on-card"><div class="sec-title">ENTRAR COM CÓDIGO</div><p>Digite o código de 6 caracteres que o anfitrião enviou.</p><input id="on-code" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC123"><button class="btn big" id="on-join"><i data-i="play"></i> <span>ENTRAR</span></button></div>
+          <div class="glass on-card"><div class="sec-title">WI‑FI LOCAL</div><p>Sem internet nem servidor: até 4 aparelhos no mesmo Wi‑Fi. O anfitrião cria a sala e cada amigo entra trocando um código (ou QR).</p><div class="on-lan-btns"><button class="btn big primary" id="lan-host"><i data-i="home"></i> <span>SER ANFITRIÃO</span></button><button class="btn big" id="lan-join"><i data-i="play"></i> <span>ENTRAR NA REDE</span></button></div></div>
         </div>
         <div class="on-msg" id="on-msg" role="status"></div>
         <details class="glass on-adv" id="on-adv"><summary>SERVIDOR DE SINALIZAÇÃO (AVANÇADO)</summary>
@@ -683,7 +702,7 @@ body.boss0 #pad0 .cb.awk,body.boss1 #pad1 .cb.awk{display:flex}
       <div id="on-room" class="hidden">
         <div class="glass lb-top">
           <div class="lb-code"><small>CÓDIGO DA SALA</small><b id="on-code-big">------</b></div>
-          <div class="lb-top-btns"><button class="btn" id="on-copy"><i data-i="copy"></i> <span>COPIAR</span></button><button class="btn" id="on-share"><i data-i="users"></i> <span>CONVIDAR</span></button></div>
+          <div class="lb-top-btns"><button class="btn hidden" id="lan-add"><i data-i="users"></i> <span>ADICIONAR JOGADOR</span></button><button class="btn" id="on-copy"><i data-i="copy"></i> <span>COPIAR</span></button><button class="btn" id="on-share"><i data-i="users"></i> <span>CONVIDAR</span></button></div>
           <div class="lb-count"><small>JOGADORES</small><b id="on-count">1/4</b></div>
         </div>
         <div class="lb-grid">
@@ -700,6 +719,9 @@ body.boss0 #pad0 .cb.awk,body.boss1 #pad1 .cb.awk{display:flex}
               <form class="lb-in" id="lb-form" autocomplete="off"><input id="lb-msg" maxlength="140" placeholder="Digite uma mensagem…" autocomplete="off" spellcheck="false" enterkeyhint="send"><button class="btn primary" id="lb-send" type="submit"><i data-i="play"></i></button></form>
             </div>
             <div class="lb-pane hidden" id="lb-opts"><div id="on-opts">
+              <div class="opt"><label>MODO</label><div class="chips" id="on-o-mode"></div></div>
+              <div class="opt" id="on-r-boss"><label>QUEM É O BOSS</label><div class="chips" id="on-o-boss"></div></div>
+              <div class="opt bossrow" id="on-r-btype"><label>SUPER ARMA DO BOSS</label><div class="chips" id="on-o-btype"></div></div>
               <div class="opt"><label>Arena</label><div class="chips" id="on-o-arena"></div></div>
               <div class="opt"><label>Vidas</label><div class="chips" id="on-o-lives"></div></div>
               <div class="opt"><label>Armas</label><div class="chips" id="on-o-weap"></div></div>
@@ -825,11 +847,25 @@ body.boss0 #pad0 .cb.awk,body.boss1 #pad1 .cb.awk{display:flex}
   <div id="toast"></div>
 </div>
 
+
+<div id="lan-modal" class="lan-modal hidden"><div class="glass lan-box">
+  <div class="sec-title" id="lan-title"></div>
+  <div id="lan-s1"><p id="lan-h1"></p>
+    <div id="lan-out"><canvas id="lan-qr"></canvas><textarea id="lan-code" readonly rows="4"></textarea><div class="lan-row"><button class="btn" id="lan-copy"><i data-i="copy"></i> <span>COPIAR CÓDIGO</span></button><button class="btn" id="lan-share"><i data-i="users"></i> <span>ENVIAR</span></button></div></div>
+  </div>
+  <div id="lan-s2" class="hidden"><p id="lan-h2"></p>
+    <textarea id="lan-paste" rows="4" placeholder="Cole aqui o código (SM1~…)" spellcheck="false" autocomplete="off"></textarea>
+    <video id="lan-vid" class="hidden" playsinline muted></video>
+    <div class="lan-row"><button class="btn hidden" id="lan-scan"><i data-i="globe"></i> <span>ESCANEAR QR</span></button><button class="btn big primary" id="lan-go"><i data-i="play"></i> <span>CONTINUAR</span></button></div>
+  </div>
+  <div class="on-msg" id="lan-msg" role="status"></div>
+  <div class="lan-row"><button class="btn danger" id="lan-close"><i data-i="back"></i> <span>FECHAR</span></button></div>
+</div></div>
 <script>
 'use strict';
 const GFX = {low: false}; // gráficos: Baixo = menos partículas/animações/resolução
 /* STICK MAYHEM — dados: armas, arenas, cosméticos, desafios */
-const WORLD_W = 1280, WORLD_H = 720, VERSION = 'v1.7.0';
+const WORLD_W = 1280, WORLD_H = 720, VERSION = 'v1.8.0';
 const GRAV = 2300;
 
 /* ---------- ícones vetoriais (traço 24x24, estilo linha) ---------- */
@@ -1714,6 +1750,7 @@ class Fighter {
 
   hurt(dmg, kx, ky, by, wid, hx, hy) {
     if (!this.alive || this.invuln > 0) return false;
+    if (by && by !== this && by.team && by.team === this.team) return false;      // sem fogo amigo (VS BOSS)
     const m = this.m;
     if (wid !== 'awk') dmg *= by ? (by.dmgMul || 1) : (m.envMul || 1);
     if (this.awk) { dmg *= 0.5; kx *= 0.15; ky *= 0.15; }
@@ -2099,7 +2136,7 @@ class Match {
     this.state = 'countdown';
     this.buildFighters();
     const training = this.arena.training;
-    const chaosLike = cfg.mode === 'chaos' || cfg.mode === 'online';
+    const chaosLike = cfg.mode === 'chaos' || cfg.mode === 'online' || cfg.mode === 'boss';
     this.maxItems = cfg.weapons === false ? 0 : (chaosLike ? 6 : 4);
     this.spawnMin = training ? 2 : (chaosLike ? 2.2 : 3.5); this.spawnMax = training ? 4 : (chaosLike ? 4.5 : 6.5);
     if (cfg.mode === 'menu') { this.state = 'play'; this.frozen = false; this.cdT = 0; this.spawnMin = 2; this.spawnMax = 4; }
@@ -2135,6 +2172,11 @@ class Match {
       let s2 = enemySkins[0]; s2.color = '#ef4444'; if (mine.color.toLowerCase() === '#ef4444') s2.color = '#e11d48';
       if (env.skin2) { s2 = Object.assign({}, env.skin2); if (s2.color.toLowerCase() === mine.color.toLowerCase()) s2.color = shadeHex(s2.color); }
       mk({slot: 1, name: 'JOGADOR 2', tag: 'P2', tcolor: '#ef4444', skin: s2, human: true, input: inp[1], spawn: sp[1], lives});
+    } else if (cfg.mode === 'boss') {
+      const hero = mk({slot: 0, name: 'JOGADOR', tag: 'P1', tcolor: '#3b82f6', skin: mine, human: true, input: inp[0], spawn: sp[0], lives});
+      const bt = SUPERS[cfg.boss && cfg.boss.type] ? cfg.boss.type : 'ki', D = SUPERS[bt];
+      const bs = Object.assign({}, enemySkins[0], {color: D.c, accent: D.c2});
+      const bf = mk({slot: -1, name: D.name, tag: 'BOSS', tcolor: D.c, skin: bs, spawn: sp[1], lives: 1}); mkAI(bf, 'hunter', cfg.diff === undefined ? 1 : cfg.diff);
     } else if (cfg.mode === 'chaos') {
       const spawns = sp.slice().sort(() => Math.random() - 0.5);
       mk({slot: 0, name: 'JOGADOR', tag: 'P1', tcolor: '#3b82f6', skin: mine, human: true, input: inp[0], spawn: spawns[0], lives});
@@ -2161,6 +2203,7 @@ class Match {
     } else if (cfg.mode === 'preview') {
       mk({slot: 0, name: '', skin: mine, human: true, input: newInput(), spawn: {x: 640, y: 600}, lives: 1});
     }
+    if (cfg.boss) this.initBoss();
     this.fighters.forEach((f, i) => { f.facing = f.x < WORLD_W / 2 ? 1 : -1; });
   }
   onKill(killer, victim, wid) {
@@ -2524,9 +2567,15 @@ class Match {
   }
   checkEnd(dt) {
     const F = this.fighters;
-    const left = F.filter(f => !f.out);
+    let left = F.filter(f => !f.out), bossTeam = '';
+    if (this.cfg.boss) {
+      const bf = F.find(f => f.team === 'boss'), hs = F.filter(f => f.team === 'hero' && !f.out);
+      if (bf && !bf.out && hs.length) return;
+      bossTeam = bf && !bf.out ? 'boss' : 'hero';
+      left = [bossTeam === 'boss' ? bf : hs.sort((a, b) => b.kills - a.kills)[0] || F.filter(f => f.team === 'hero').sort((a, b) => b.kills - a.kills)[0]];
+    }
     let timeUp = false;
-    if (this.cfg.timeLimit > 0 && this.t >= this.cfg.timeLimit && left.length > 1) timeUp = true;
+    if (!this.cfg.boss && this.cfg.timeLimit > 0 && this.t >= this.cfg.timeLimit && left.length > 1) timeUp = true;
     if (left.length <= 1 || timeUp) {
       this.ended = true; this.timeScale = 0.35; this.state = 'ending';
       let w = left[0] || null, draw = false;
@@ -2540,7 +2589,8 @@ class Match {
       for (const f of F) if (f.awk) f.endAwk();
       if (w) { w.celebrate = true; w.winAnim = Math.max(0, WIN_IDS.indexOf(w.skin.win)); w.invuln = 99; }
       if (w && typeof reactNow === 'function') reactNow(w, 4);
-      this.result = {winner: w, time: this.t, draw, timeUp};
+      this.result = {winner: w, time: this.t, draw, timeUp, team: bossTeam};
+      if (bossTeam) for (const f of F) if (f.team === bossTeam && !f.out && f !== w) { f.celebrate = true; f.winAnim = Math.max(0, WIN_IDS.indexOf(f.skin.win)); f.invuln = 99; }
       F.forEach(f => { if (!f.out) f.elimTime = this.t; });
       SFX.play(w && w.human ? 'win' : 'lose');
       this.endDelay = 2.2;
@@ -4057,7 +4107,7 @@ function endSuper(f) {
   if (!f.sup) return;
   f.sup = null; f.maxhp = f.baseMax || 100; f.hp = Math.min(f.hp, f.maxhp); f.h = BH; f.w = BW;
 }
-Fighter.prototype.becomeSuper = function (type) {
+Fighter.prototype.becomeSuper = function (type, quiet) {
   const m = this.m, D = SUPERS[type]; if (!D) return;
   this.dropWeapon(false); this.awk = null; this.ragdoll = false; this.stun = 0; this.hitstun = 0; this.atkT = -1; this.dashT = 0; this.charge = 0; this.beamT = 0; this.getUpT = 0;
   this.baseMax = this.maxhp; this.maxhp = Math.round(D.hp + (this.maxhp - 100) * 1.5); this.hp = this.maxhp;
@@ -4065,8 +4115,7 @@ Fighter.prototype.becomeSuper = function (type) {
   this.h = BH * D.sc; this.w = BW * 1.2; this.invuln = Math.max(this.invuln, 1.2);
   m.fx.ring(this.cx, this.cy, 260, 0.8, D.c, 8); m.fx.ring(this.cx, this.cy, 160, 0.6, '#fff', 5); m.fx.burst(this.cx, this.cy, 40, 700, 0.9, 5, D.c, 0, 0);
   m.fx.addShake(12); m.fx.flash = 0.2; m.addShock(this.cx, this.cy, 10, 640, 0.7, D.c, 9);
-  SFX.play('sup_pick');
-  m.showBanner(this.name + ' VIROU ' + D.name + '!', D.c);
+  if (!quiet) { SFX.play('sup_pick'); m.showBanner(this.name + ' VIROU ' + D.name + '!', D.c); }
 };
 Fighter.prototype.updateSuper = function (dt) {
   const m = this.m, I = this.input, S = this.sup, D = SUPERS[S.type], MV = SUP_MOVES[S.type];
@@ -4123,7 +4172,18 @@ Match.prototype.supInit = function () {
   this.supOn = okMode && c.supers !== false && !this.arena.training && !this.env.netClient;
   this.supAt = rnd(13, 26); this.supDone = false; this.supItem = null; this.banner = null;
 };
+Match.prototype.initBoss = function () {
+  const c = this.cfg, F = this.fighters, type = SUPERS[c.boss && c.boss.type] ? c.boss.type : 'ki', D = SUPERS[type];
+  let bf = c.mode === 'boss' ? F.find(f => f.slot === -1 && f.brain) : F.find(f => f.netPid === c.boss.pid);
+  if (!bf) bf = F[F.length - 1];
+  const nh = Math.max(1, F.length - 1);
+  for (const f of F) f.team = f === bf ? 'boss' : 'hero';
+  bf.lives = 1; bf.maxLives = 1; bf.bossType = type;
+  if (!this.env.netClient) { bf.becomeSuper(type, true); bf.invuln = 0; bf.maxhp = bf.hp = Math.round(D.hp * 1.35 * (1 + 0.7 * (nh - 1))); }
+  this.supOn = false; this.bossId = bf.id;
+};
 Match.prototype.supUpdate = function (dt) {
+  if (this.cfg.boss && !this._bb && this.state === 'play' && !this.env.netClient) { this._bb = 1; const b = this.fighters[this.bossId], D = b && SUPERS[b.bossType]; if (D) { this.showBanner('BOSS: ' + D.name + ' — DERROTEM!', D.c); SFX.play('sup_drop'); } }
   if (this.banner) { this.banner.t -= dt; if (this.banner.t <= 0) this.banner = null; }
   if (!this.supOn || this.env.netClient) return;
   // sorteio e queda do item
@@ -4178,9 +4238,10 @@ function supBot(f, dt) {
   I.aimX = dx / l; I.aimY = dy / l; if (Math.abs(I.aimX) < 0.2) I.aimX = 0.2 * sgn(dx || f.facing);
   if (S.act || B.w > 0) return;
   const aligned = Math.abs(dy) < 90, r = Math.random();
-  B.w = rnd(0.12, 0.4);
+  const dm = [1.8, 1, 0.55][f.m.cfg.diff === undefined ? 1 : f.m.cfg.diff] || 1;
+  B.w = rnd(0.12, 0.4) * dm;
   const c = S.cd;
-  if (c[3] <= 0 && (T !== 'titan' || dist < 500) && (T !== 'steel' || dist > 220)) { I.awkP = true; B.w = 0.6; return; }
+  if (c[3] <= 0 && (T !== 'titan' || dist < 500) && (T !== 'steel' || dist > 220)) { I.awkP = true; B.w = 0.6 * dm; return; }
   if (T === 'ki') { if (c[1] <= 0 && aligned && dist > 260 && r < 0.6) I.spP = true; else if (c[2] <= 0 && dist < 520 && r < 0.4) I.dropP = true; else if (c[0] <= 0 && dist < 800) I.atkH = true; }
   else if (T === 'steel') { if (c[1] <= 0 && dist > 200 && aligned && r < 0.5) I.spP = true; else if (c[2] <= 0 && dist < 300 && aligned && r < 0.5) I.dropP = true; else if (c[0] <= 0 && dist < 400 && r < 0.8) I.atkH = true; }
   else if (T === 'titan') { if (c[2] <= 0 && dist < 600 && r < 0.4) I.dropP = true; else if (c[1] <= 0 && dist < 600 && dist > 120 && r < 0.4) I.spP = true; else if (c[0] <= 0 && dist < 800) I.atkH = true; }
@@ -4865,6 +4926,7 @@ function drawBar(ctx, x, y, w, h, p, col, flip) {
   ctx.strokeStyle = OUT; ctx.lineWidth = 2.5; ctx.strokeRect(x, y, w, h);
 }
 function weaponLine(f) {
+  if (f.sup) return 'SUPER · ' + SUPERS[f.sup.type].sub;
   if (!f.wp) return 'Punhos';
   const w = WEAPONS[f.wp.id];
   if (w.type === 'melee') return w.name;
@@ -4882,7 +4944,7 @@ function drawHUD(ctx, m, t) {
   };
   const pips = (f, x, y, flip) => {
     if (!stock) return;
-    for (let i = 0; i < (m.cfg.lives || 3); i++) { const px = flip ? x - i * 20 : x + i * 20; ctx.fillStyle = i < f.lives ? f.tcolor : 'rgba(255,255,255,0.18)'; ctx.strokeStyle = OUT; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, y, 7, 0, 6.283); ctx.fill(); ctx.stroke(); }
+    for (let i = 0; i < (f.maxLives || m.cfg.lives || 3); i++) { const px = flip ? x - i * 20 : x + i * 20; ctx.fillStyle = i < f.lives ? f.tcolor : 'rgba(255,255,255,0.18)'; ctx.strokeStyle = OUT; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, y, 7, 0, 6.283); ctx.fill(); ctx.stroke(); }
   };
   if (F.length === 2) {
     for (let i = 0; i < 2; i++) {
@@ -4916,6 +4978,12 @@ function drawHUD(ctx, m, t) {
       if (stock) pips(f, x + 8, y + 66 + eo2, false);
       label(f.out ? 'ELIMINADO' : weaponLine(f), x, (stock ? y + 98 : y + 74) + eo2, 'left', 17, f.out ? '#ef4444' : '#e2e8f0');
     });
+  }
+  if (m.cfg.boss && m.bossId !== undefined && F[m.bossId] && F.length > 2) {
+    const b = F[m.bossId], D = SUPERS[b.bossType] || SUPERS.ki, bw = 560, bx = (WORLD_W - bw) / 2, by = 662;
+    label((b.netPid !== undefined && b.name ? b.name + ' · ' : '') + D.name, WORLD_W / 2, by - 6, 'center', 20, D.c);
+    drawBar(ctx, bx, by, bw, 24, clamp(b.hp / b.maxhp, 0, 1), '#ef4444', false);
+    label(Math.ceil(Math.max(0, b.hp)) + ' / ' + b.maxhp, WORLD_W / 2, by + 18, 'center', 14, '#fff');
   }
   // contagem regressiva
   if (m.state === 'countdown') {
@@ -5956,6 +6024,94 @@ const FatPreview = {
 };
 
 'use strict';
+/* gerador de QR Code próprio (modo byte, correção L, versões 1–10) — sem bibliotecas externas */
+const QR = (() => {
+  // [palavras de código totais, ec por bloco, [[qtd blocos, dados por bloco], ...]]
+  const VER = [null, [26, 7, [[1, 19]]], [44, 10, [[1, 34]]], [70, 15, [[1, 55]]], [100, 20, [[1, 80]]], [134, 26, [[1, 108]]],
+    [172, 18, [[2, 68]]], [196, 20, [[2, 78]]], [242, 24, [[2, 97]]], [292, 30, [[2, 116]]], [346, 18, [[2, 68], [2, 69]]]];
+  const ALIGN = [null, [], [6, 18], [6, 22], [6, 26], [6, 30], [6, 34], [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50]];
+  const EXP = new Array(512), LOG = new Array(256);
+  { let x = 1; for (let i = 0; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 256) x ^= 0x11d; } for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255]; }
+  const mul = (a, b) => (a && b ? EXP[LOG[a] + LOG[b]] : 0);
+  function rs(data, n) {
+    let g = [1];
+    for (let i = 0; i < n; i++) { const ng = new Array(g.length + 1).fill(0); for (let j = 0; j < g.length; j++) { ng[j] ^= g[j]; ng[j + 1] ^= mul(g[j], EXP[i]); } g = ng; }
+    const r = new Array(n).fill(0);
+    for (const d of data) { const f = d ^ r[0]; r.shift(); r.push(0); for (let j = 0; j < n; j++) r[j] ^= mul(g[j + 1], f); }
+    return r;
+  }
+  function bch(v, g, gl) { let r = v; const top = (x) => 31 - Math.clz32(x); while (top(r) >= gl) r ^= g << (top(r) - gl); return r; }
+  function make(text) {
+    const bytes = Array.from(new TextEncoder().encode(text));
+    let ver = 0;
+    for (let v = 1; v <= 10; v++) { const cap = VER[v][2].reduce((s, b) => s + b[0] * b[1], 0); if (4 + (v < 10 ? 8 : 16) + bytes.length * 8 <= cap * 8) { ver = v; break; } }
+    if (!ver) throw new Error('QR: texto grande demais');
+    const [total, ecn, groups] = VER[ver], cap = groups.reduce((s, b) => s + b[0] * b[1], 0);
+    // fluxo de bits
+    const bits = []; const put = (v, n) => { for (let i = n - 1; i >= 0; i--) bits.push((v >> i) & 1); };
+    put(4, 4); put(bytes.length, ver < 10 ? 8 : 16); bytes.forEach(b => put(b, 8));
+    for (let i = 0; i < 4 && bits.length < cap * 8; i++) bits.push(0);
+    while (bits.length % 8) bits.push(0);
+    const data = []; for (let i = 0; i < bits.length; i += 8) { let v = 0; for (let j = 0; j < 8; j++) v = (v << 1) | bits[i + j]; data.push(v); }
+    for (let p = 0; data.length < cap; p++) data.push(p % 2 ? 0x11 : 0xec);
+    // blocos + ec
+    const blocks = []; let o = 0;
+    for (const [cnt, len] of groups) for (let i = 0; i < cnt; i++) { const d = data.slice(o, o + len); o += len; blocks.push({d, e: rs(d, ecn)}); }
+    const cw = []; const maxd = Math.max(...blocks.map(b => b.d.length));
+    for (let i = 0; i < maxd; i++) for (const b of blocks) if (i < b.d.length) cw.push(b.d[i]);
+    for (let i = 0; i < ecn; i++) for (const b of blocks) cw.push(b.e[i]);
+    // matriz
+    const n = 17 + ver * 4, M = [], F = [];
+    for (let i = 0; i < n; i++) { M.push(new Array(n).fill(0)); F.push(new Array(n).fill(false)); }
+    const set = (r, c, v) => { if (r >= 0 && c >= 0 && r < n && c < n) { M[r][c] = v ? 1 : 0; F[r][c] = true; } };
+    const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const in_ = i >= 0 && i <= 6 && j >= 0 && j <= 6; set(r + i, c + j, in_ && (i === 0 || i === 6 || j === 0 || j === 6 || (i >= 2 && i <= 4 && j >= 2 && j <= 4))); } };
+    finder(0, 0); finder(0, n - 7); finder(n - 7, 0);
+    const al = ALIGN[ver];
+    for (const r of al) for (const c of al) { if ((r === 6 && c === 6) || (r === 6 && c === al[al.length - 1] && al.length > 1 && c === n - 7) || (c === 6 && r === n - 7)) continue; if (F[r][c]) continue; for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) set(r + i, c + j, Math.max(Math.abs(i), Math.abs(j)) !== 1); }
+    for (let i = 8; i < n - 8; i++) { if (!F[6][i]) set(6, i, i % 2 === 0); if (!F[i][6]) set(i, 6, i % 2 === 0); }
+    set(n - 8, 8, 1);
+    // reserva formato/versão
+    for (let i = 0; i < 9; i++) { if (!F[8][i]) { F[8][i] = true; } if (!F[i][8]) { F[i][8] = true; } }
+    for (let i = 0; i < 8; i++) { F[8][n - 1 - i] = true; F[n - 1 - i][8] = true; }
+    F[n - 8][8] = true;
+    if (ver >= 7) for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) { F[i][n - 11 + j] = true; F[n - 11 + j][i] = true; }
+    // dados em zigue-zague
+    const D = []; { let up = true, bi = 0; for (let c = n - 1; c > 0; c -= 2) { if (c === 6) c--; for (let k = 0; k < n; k++) { const r = up ? n - 1 - k : k; for (let dc = 0; dc < 2; dc++) { const cc = c - dc; if (!F[r][cc]) { const byte = cw[bi >> 3] || 0; D.push([r, cc, (byte >> (7 - (bi & 7))) & 1]); bi++; } } } up = !up; } }
+    const MASK = [(r, c) => (r + c) % 2 === 0, (r, c) => r % 2 === 0, (r, c) => c % 3 === 0, (r, c) => (r + c) % 3 === 0, (r, c) => (((r >> 1) + Math.floor(c / 3)) % 2) === 0,
+      (r, c) => ((r * c) % 2) + ((r * c) % 3) === 0, (r, c) => ((((r * c) % 2) + ((r * c) % 3)) % 2) === 0, (r, c) => ((((r + c) % 2) + ((r * c) % 3)) % 2) === 0];
+    const build = mk => {
+      const A = M.map(r => r.slice());
+      for (const [r, c, v] of D) A[r][c] = v ^ (MASK[mk](r, c) ? 1 : 0);
+      const fmt = ((1 << 3) | mk) << 10 | bch(((1 << 3) | mk) << 10, 0x537, 10), fv = fmt ^ 0x5412;
+      const bit = i => (fv >> i) & 1;
+      for (let i = 0; i < 6; i++) A[i][8] = bit(i); A[7][8] = bit(6); A[8][8] = bit(7); A[8][7] = bit(8); for (let i = 9; i < 15; i++) A[8][14 - i] = bit(i);
+      for (let i = 0; i < 8; i++) A[8][n - 1 - i] = bit(i); for (let i = 8; i < 15; i++) A[n - 15 + i][8] = bit(i);
+      A[n - 8][8] = 1;
+      if (ver >= 7) { const vi = ver << 12 | bch(ver << 12, 0x1f25, 12); for (let i = 0; i < 18; i++) { const b = (vi >> i) & 1, a = Math.floor(i / 3), c = i % 3 + n - 11; A[a][c] = b; A[c][a] = b; } }
+      return A;
+    };
+    const pen = A => {
+      let p = 0;
+      for (let t = 0; t < 2; t++) for (let i = 0; i < n; i++) { let run = 1; for (let j = 1; j < n; j++) { const a = t ? A[j][i] : A[i][j], b = t ? A[j - 1][i] : A[i][j - 1]; if (a === b) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+      for (let i = 0; i < n - 1; i++) for (let j = 0; j < n - 1; j++) { const v = A[i][j]; if (v === A[i][j + 1] && v === A[i + 1][j] && v === A[i + 1][j + 1]) p += 3; }
+      let d = 0; for (const r of A) for (const v of r) d += v; p += Math.floor(Math.abs(d * 100 / (n * n) - 50) / 5) * 10;
+      return p;
+    };
+    let best = null, bp = 1e9; for (let mk = 0; mk < 8; mk++) { const A = build(mk), p = pen(A); if (p < bp) { bp = p; best = A; } }
+    return {n, m: best};
+  }
+  function draw(cv, text, px) {
+    const q = make(text), s = px || 5, quiet = 4, size = (q.n + quiet * 2) * s;
+    cv.width = cv.height = size; const c = cv.getContext('2d');
+    c.fillStyle = '#fff'; c.fillRect(0, 0, size, size); c.fillStyle = '#000';
+    for (let r = 0; r < q.n; r++) for (let k = 0; k < q.n; k++) if (q.m[r][k]) c.fillRect((k + quiet) * s, (r + quiet) * s, s, s);
+    return q;
+  }
+  return {make, draw};
+})();
+if (typeof module !== 'undefined') module.exports = QR;
+
+'use strict';
 /* STICK MAYHEM v1.4.0 — ONLINE: salas com código de convite, até 4 jogadores.
    Transporte: WebRTC (RTCDataChannel) peer-a-peer; a sinalização usa o protocolo do servidor PeerJS
    (WebSocket) — por padrão o servidor público 0.peerjs.com, configurável. O HOST é autoritativo:
@@ -6014,10 +6170,10 @@ class NetSignal {
 
 // ---------------------------------------------------------------- ligação ponto a ponto
 class NetLink {
-  constructor(sig, remote, initiator, h) {
+  constructor(sig, remote, initiator, h, ice) {
     this.sig = sig; this.remote = remote; this.h = h; this.initiator = initiator; this.pc = null; this.r = null; this.u = null;
     this.pend = []; this.haveRemote = false; this.closed = false; this.opened = false;
-    const pc = this.pc = new RTCPeerConnection({iceServers: NET_ICE});
+    const pc = this.pc = new RTCPeerConnection({iceServers: ice || NET_ICE});
     pc.onicecandidate = e => { if (e.candidate) this.sig.send({type: 'CANDIDATE', dst: remote, payload: {candidate: e.candidate}}); };
     pc.onconnectionstatechange = () => { const s = pc.connectionState; if (s === 'failed' || s === 'closed') this.fail('ice'); else if (s === 'disconnected') { clearTimeout(this._dc); this._dc = setTimeout(() => { if (pc.connectionState === 'disconnected') this.fail('ice'); }, 5000); } };
     pc.ondatachannel = e => this.attach(e.channel);
@@ -6040,6 +6196,15 @@ class NetLink {
     const a = await this.pc.createAnswer(); await this.pc.setLocalDescription(a);
     this.sig.send({type: 'ANSWER', dst: this.remote, payload: {sdp: this.pc.localDescription}});
   }
+  gathered(ms) {
+    const pc = this.pc;
+    return new Promise(res => {
+      if (pc.iceGatheringState === 'complete') return res();
+      const t = setTimeout(done, ms || 3500); function done() { clearTimeout(t); pc.removeEventListener('icegatheringstatechange', ck); res(); }
+      function ck() { if (pc.iceGatheringState === 'complete') done(); }
+      pc.addEventListener('icegatheringstatechange', ck);
+    });
+  }
   async onAnswer(sdp) { await this.pc.setRemoteDescription(sdp); this.haveRemote = true; await this.flush(); }
   async onCand(c) { if (!this.haveRemote) { this.pend.push(c); return; } try { await this.pc.addIceCandidate(c); } catch (e) {} }
   async flush() { for (const c of this.pend.splice(0)) { try { await this.pc.addIceCandidate(c); } catch (e) {} } }
@@ -6053,10 +6218,41 @@ class NetLink {
   destroy() { this.closed = true; try { this.r && this.r.close(); this.u && this.u.close(); this.pc.close(); } catch (e) {} }
 }
 
+
+// ---------------------------------------------------------------- Wi‑Fi local (sem servidor): códigos de conexão trocados à mão / QR
+// O "código" é um SDP enxuto: só ufrag, senha, impressão digital, papel DTLS e candidatos de rede local (host).
+const LAN = {
+  b64(hex) { const b = hex.split(':').map(x => parseInt(x, 16)); return btoa(String.fromCharCode.apply(null, b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); },
+  unb64(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Array.from(atob(s)).map(c => ('0' + c.charCodeAt(0).toString(16)).slice(-2).toUpperCase()).join(':'); },
+  pack(sdp, type) {
+    const g = re => { const m = sdp.match(re); return m ? m[1].trim() : ''; };
+    const ufrag = g(/a=ice-ufrag:(\S+)/), pwd = g(/a=ice-pwd:(\S+)/), fp = g(/a=fingerprint:sha-256 (\S+)/), setup = g(/a=setup:(\S+)/);
+    if (!ufrag || !pwd || !fp) throw new Error('sdp');
+    const c = [];
+    for (const m of sdp.matchAll(/a=candidate:\S+ 1 udp \d+ (\S+) (\d+) typ host/g)) { const ip = m[1]; if (ip.includes(':')) continue; const k = ip + ':' + m[2]; if (!c.includes(k)) c.push(k); }
+    if (!c.length) throw new Error('nocand');
+    return 'SM1~' + [type, ufrag, pwd, LAN.b64(fp), setup === 'actpass' ? 'p' : setup === 'passive' ? 's' : 'a', c.slice(0, 5).join(',')].join('~');
+  },
+  unpack(code) {
+    code = String(code || '').replace(/\s+/g, ''); const i = code.indexOf('SM1~'); if (i < 0) throw new Error('fmt'); code = code.slice(i);
+    const p = code.split('~'); if (p.length !== 7 || p[0] !== 'SM1' || !/^[oa]$/.test(p[1])) throw new Error('fmt');
+    const [, type, ufrag, pwd, fp, su, cs] = p;
+    if (!/^[\w+\/-]{3,64}$/.test(ufrag) || !/^[\w+\/-]{16,64}$/.test(pwd) || !/^[\w-]{43}$/.test(fp)) throw new Error('fmt');
+    const cand = cs.split(',').filter(x => /^[\w.-]{1,80}:\d{1,5}$/.test(x));
+    if (!cand.length) throw new Error('fmt');
+    const lines = ['v=0', 'o=- 4611731400430051336 2 IN IP4 127.0.0.1', 's=-', 't=0 0', 'a=group:BUNDLE 0', 'a=msid-semantic: WMS', 'm=application 9 UDP/DTLS/SCTP webrtc-datachannel', 'c=IN IP4 0.0.0.0',
+      'a=ice-ufrag:' + ufrag, 'a=ice-pwd:' + pwd, 'a=fingerprint:sha-256 ' + LAN.unb64(fp), 'a=setup:' + (su === 'p' ? 'actpass' : su === 'a' ? 'active' : 'passive'), 'a=mid:0', 'a=sctp-port:5000', 'a=max-message-size:262144'];
+    cand.forEach((x, k) => { const j = x.lastIndexOf(':'); lines.push('a=candidate:' + (k + 1) + ' 1 udp ' + (2113937151 - k * 256) + ' ' + x.slice(0, j) + ' ' + x.slice(j + 1) + ' typ host generation 0'); });
+    lines.push('a=end-of-candidates');
+    return {type: type === 'o' ? 'offer' : 'answer', sdp: lines.join('\r\n') + '\r\n'};
+  },
+};
+const NO_SIG = {send() {}};
+
 // ---------------------------------------------------------------- sala
 const Net = {
   role: null,            // null | 'host' | 'client'
-  code: '', pid: -1, players: [], opts: {arena: 'neon', lives: 3, weapons: true, awk: false, fatality: false, supers: true}, phase: 'idle', // idle|connecting|lobby|play|result
+  code: '', pid: -1, players: [], opts: {arena: 'neon', lives: 3, weapons: true, awk: false, fatality: false, supers: true, mode: 'ffa', boss: 0, bossType: 'random'}, phase: 'idle', // idle|connecting|lobby|play|result
   ping: 0, status: '', sig: null, links: {}, hostLink: null, inputs: {}, ev: [], seq: 0, on: {}, inSim: false,
   conf() {
     // padrão: o próprio site que serve o jogo (Render) também faz a sinalização; abrindo o arquivo local (file://) cai no servidor público do PeerJS
@@ -6075,7 +6271,7 @@ const Net = {
     if (this.hostLink) this.hostLink.destroy();
     clearInterval(this._iv); clearTimeout(this._to);
     this.restoreSfx();
-    this.role = null; this.code = ''; this.pid = -1; this.players = []; this.phase = 'idle'; this.sig = null; this.links = {}; this.hostLink = null; this.inputs = {}; this.ev = []; this.ping = 0; this.match = null; this.snap = null;
+    this.role = null; this.lan = false; this.code = ''; this.pid = -1; this.players = []; this.phase = 'idle'; this.sig = null; this.links = {}; this.hostLink = null; this.inputs = {}; this.ev = []; this.ping = 0; this.match = null; this.snap = null;
     this.chat = []; this.chatN = 0;
   },
   // ---------- chat do lobby + skin ao vivo
@@ -6170,6 +6366,7 @@ const Net = {
         if (m.j > c.j) { inp.jumpP = true; c.j = m.j; } if (m.s > c.s) { inp.spP = true; c.s = m.s; } if (m.d > c.d) { inp.dropP = true; c.d = m.d; } if (m.a > c.a) { inp.awkP = true; c.a = m.a; }
         break;
       }
+      case 'bt': { if (this.phase !== 'play' && this.opts.mode === 'boss' && L.pid === this.opts.boss && (m.t === 'random' || SUPERS[m.t])) this.setOpts({bossType: m.t}); break; }
       case 'sk': { if (this.phase === 'play') break; const p = this.players.find(x => x.pid === L.pid); if (!p) break; p.skin = netSkin(m.skin, p.pid); this.roomSoon(); this.emit('room'); break; }
       case 'chat': { if (!this.chatOk()) break; const now = performance.now(); if (now - (L.chT || 0) < 500) break; L.chT = now; this.pushChat(L.pid, m.t); break; }
       case 'rx': if (this.phase === 'play' && this.match) { const f = this.match.fighters.find(x => x.netPid === L.pid); if (f && f.alive && typeof reactTry === 'function') reactTry(f, m.i | 0); } break;
@@ -6193,6 +6390,7 @@ const Net = {
     for (const k in this.links) if (this.links[k].pid >= 0) this.links[k].send(o);
   },
   roomSoon() { const now = performance.now(); if (now - (this._rsT || 0) >= 80) { this._rsT = now; this.sendRoom(); } else if (!this._rsTm) this._rsTm = setTimeout(() => { this._rsTm = 0; this._rsT = performance.now(); if (this.role === 'host') this.sendRoom(); }, 90); },
+  setBossType(t) { if (this.role === 'host') this.setOpts({bossType: t}); else if (this.hostLink) this.hostLink.send({k: 'bt', t}); },
   setOpts(o) { Object.assign(this.opts, o); if (this.role === 'host') { this.sendRoom(); this.emit('room'); } },
   bcast(o, unrel) { for (const k in this.links) { const L = this.links[k]; if (L.pid >= 0) L.send(o, unrel); } },
   canStart() { return this.role === 'host' && this.phase === 'lobby' && this.players.length >= 2; },
@@ -6205,9 +6403,13 @@ const Net = {
     const awk = !!this.opts.awk, cfg = {mode: 'online', arena: this.opts.arena, format: 'stock', lives: this.opts.lives, weapons: this.opts.weapons !== false, camFx: true, players: pl, online: true,
       awk: {on: awk, charge: 'normal', dmg: 'normal'}, fatality: !!this.opts.fatality, supers: this.opts.supers !== false};
     if (awk) cfg.hp = AWK.hp;
+    if (this.opts.mode === 'boss') {
+      const bp = pl.some(p => p.pid === this.opts.boss) ? this.opts.boss : 0, bt = SUPERS[this.opts.bossType] ? this.opts.bossType : SUPER_IDS[(Math.random() * SUPER_IDS.length) | 0];
+      cfg.boss = {pid: bp, type: bt}; cfg.fatality = false; cfg.supers = false;
+    }
     this.phase = 'play'; this.inputs = {};
     for (const p of pl) if (p.pid !== 0) this.inputs[p.pid] = newInput();
-    this.bcast({k: 'start', cfg: {arena: cfg.arena, lives: cfg.lives, weapons: cfg.weapons, awk, fatality: cfg.fatality, supers: cfg.supers, players: pl}});
+    this.bcast({k: 'start', cfg: {arena: cfg.arena, lives: cfg.lives, weapons: cfg.weapons, awk, fatality: cfg.fatality, supers: cfg.supers, boss: cfg.boss || null, players: pl}});
     for (const k in this.links) this.links[k].cnt = {j: 0, s: 0, d: 0, a: 0};
     this.emit('room'); return cfg;
   },
@@ -6264,8 +6466,9 @@ const Net = {
   // monta o resultado; a interface decide se há Fatality antes de enviar 'end'
   hostEnd(m) {
     const res = m.result || {}, F = m.fighters, w = res.winner || null;
-    const rows = F.map(f => ({pid: f.netPid, name: f.name, kills: f.kills, deaths: f.deaths, dmg: Math.round(f.dmgDealt), surv: Math.round(f.surviveT), win: w === f}));
-    const out = {rows, winner: w ? w.netPid : -1, draw: !w, timeUp: !!res.timeUp, time: Math.round(m.t)};
+    const bt = res.team || '';
+    const rows = F.map(f => ({pid: f.netPid, name: f.name, kills: f.kills, deaths: f.deaths, dmg: Math.round(f.dmgDealt), surv: Math.round(f.surviveT), win: bt ? f.team === bt : w === f, team: f.team || ''}));
+    const out = {rows, winner: w ? w.netPid : -1, draw: !w, timeUp: !!res.timeUp, time: Math.round(m.t), team: bt};
     this.phase = 'result'; this.restoreSfx(); this.match = null;
     let fat = null;
     if (w && m.cfg.fatality) {
@@ -6281,6 +6484,47 @@ const Net = {
   backToLobby() {
     if (this.role !== 'host') return;
     this.phase = 'lobby'; this.inputs = {}; this.match = null; this.restoreSfx(); this.sendRoom(); this.emit('room');
+  },
+
+  // ---------- Wi‑Fi LOCAL (sem servidores): host
+  lanHost(name, skin) {
+    this.reset(); this.role = 'host'; this.lan = true; this.name = netClean(name, 12) || 'JOGADOR'; this.skin = skin; this.code = 'LOCAL';
+    this.pid = 0; this.players = [this.mk(0, this.name, skin, 0)]; this.phase = 'lobby'; this.lastSeen = {}; this._lanN = 0;
+    this.setStatus('Sala local criada. Adicione os jogadores.'); this.emit('room');
+    clearInterval(this._iv); this._iv = setInterval(() => this.hostWatch(), 1000);
+  },
+  async lanAccept(code) {             // host recebe o código do convidado → devolve o código de resposta
+    if (this.role !== 'host' || !this.lan) throw new Error('state');
+    const desc = LAN.unpack(code); if (desc.type !== 'offer') throw new Error('fmt');
+    const n = Object.keys(this.links).length; if (n >= NET_MAX - 1 + 2) throw new Error('full');
+    const rid = 'lan' + (++this._lanN);
+    const L = new NetLink(NO_SIG, rid, false, {open: l => {}, msg: (x, l) => this.hostMsg(x, l), close: (l, why) => this.hostDrop(l, why)}, []);
+    L.rid = rid; L.pid = -1; L.t0 = performance.now() + 75000; this.links[rid] = L;
+    try {
+      await L.pc.setRemoteDescription(desc); L.haveRemote = true;
+      const a = await L.pc.createAnswer(); await L.pc.setLocalDescription(a); await L.gathered();
+      return LAN.pack(L.pc.localDescription.sdp, 'a');
+    } catch (e) { L.fail('sdp'); throw e; }
+  },
+  // convidado
+  async lanJoin(name, skin) {          // gera o código do convidado
+    this.reset(); this.role = 'client'; this.lan = true; this.phase = 'connecting'; this.code = 'LOCAL'; this.name = netClean(name, 12) || 'JOGADOR'; this.skin = skin;
+    let got = false;
+    const fail = t => { if (got) return; this.fatal(t); };
+    const L = this.hostLink = new NetLink(NO_SIG, 'host', true, {
+      open: l => { l.send({k: 'hello', proto: NET_PROTO, name: this.name, skin: this.skin}); this.setStatus('Entrando na sala…'); },
+      msg: (m, l) => this.clientMsg(m, l, () => { got = true; }),
+      close: (l, why) => { if (this.role !== 'client') return; if (!got) fail('Não foi possível conectar ao anfitrião (Wi‑Fi com isolamento de aparelhos, código errado ou aparelhos em redes diferentes).'); else this.lost('Conexão com o host perdida.'); },
+    }, []);
+    L.seen = performance.now(); this._lanFail = fail;
+    const o = await L.pc.createOffer(); await L.pc.setLocalDescription(o); await L.gathered();
+    return LAN.pack(L.pc.localDescription.sdp, 'o');
+  },
+  async lanFinish(code) {              // convidado cola a resposta do host
+    if (this.role !== 'client' || !this.hostLink) throw new Error('state');
+    const desc = LAN.unpack(code); if (desc.type !== 'answer') throw new Error('fmt');
+    await this.hostLink.pc.setRemoteDescription(desc); this.hostLink.haveRemote = true;
+    this.setStatus('Conectando…'); clearTimeout(this._to); this._to = setTimeout(() => this._lanFail && this._lanFail('Tempo esgotado: não foi possível conectar ao anfitrião. Verifique se estão no mesmo Wi‑Fi e se o roteador não isola os aparelhos.'), 20000);
   },
 
   // ---------- CLIENTE
@@ -6333,6 +6577,7 @@ const Net = {
         const pl = (c.players || []).slice(0, NET_MAX).map(p => ({pid: p.pid | 0, name: netClean(p.name, 12), color: NET_HEX.test(p.color) ? p.color : NET_COLORS[p.pid & 3], skin: netSkin(p.skin, p.pid & 3)}));
         this.snap = null; this.ev = []; this.cnt = {j: 0, s: 0, d: 0, a: 0}; this.evq = [];
         const awk = !!c.awk, cf = {mode: 'online', arena: ARENAS[c.arena] ? c.arena : 'neon', format: 'stock', lives: Math.max(1, Math.min(10, c.lives | 0 || 3)), weapons: c.weapons !== false, camFx: true, players: pl, online: true, client: true, awk: {on: awk, charge: 'normal', dmg: 'normal'}, fatality: !!c.fatality, supers: c.supers !== false};
+        if (c.boss && SUPERS[c.boss.type] && pl.some(p => p.pid === (c.boss.pid | 0))) { cf.boss = {pid: c.boss.pid | 0, type: c.boss.type}; cf.supers = false; cf.fatality = false; }
         if (awk) cf.hp = AWK.hp;
         this.emit('start', cf);
         break;
@@ -6474,7 +6719,7 @@ function defaults() {
     keys: {p1: Object.assign({}, KEYS0.p1), p2: Object.assign({}, KEYS0.p2)},
     set: {music: 0.6, sfx: 0.8, quality: 1, cs: 1, co: 0.75, shake: true, haptic: true, mirror: false},
     stats: {matches: 0, wins: 0, losses: 0, kills: 0, deaths: 0, dmg: 0, time: 0, duelWins: 0, fatalities: 0, chaosPlayed: 0, bestSurvive: 0, weaponKills: {}},
-    ch: {prog: {}, done: {}}, sel: {mode: 'duel_cpu', diff: 1, format: 'elim', arena: 'neon', awkFmt: 'cpu'},
+    ch: {prog: {}, done: {}}, sel: {mode: 'duel_cpu', diff: 1, format: 'elim', arena: 'neon', awkFmt: 'cpu', bossLives: 3, bossType: 'random'},
     net: {name: '', host: '', port: '', path: '', secure: true, arena: 'neon', lives: 3, weapons: true}};
 }
 function merge(a, b) {
@@ -6823,7 +7068,10 @@ function chips(el, items, cur, cb) {
 function buildPlay() {
   const sel = save.sel;
   $$('.mode-card').forEach(c => { c.classList.toggle('sel', c.dataset.mode === sel.mode); c.onclick = () => { SFX.play('select'); sel.mode = c.dataset.mode; persist(); buildPlay(); }; });
-  $('#opt-diff-row').style.display = sel.mode === 'chaos' ? 'flex' : 'none';
+  $('#opt-diff-row').style.display = sel.mode === 'chaos' || sel.mode === 'boss' ? 'flex' : 'none';
+  $('#opt-bosslives-row').style.display = $('#opt-bosstype-row').style.display = sel.mode === 'boss' ? 'flex' : 'none';
+  chips($('#opt-bosslives'), [1, 3, 5, 10].map(n => [n, String(n)]), sel.bossLives || 3, v => { sel.bossLives = v; persist(); buildPlay(); });
+  chips($('#opt-bosstype'), [['random', 'ALEATÓRIO']].concat(SUPER_IDS.map(id => [id, SUPERS[id].name])), sel.bossType || 'random', v => { sel.bossType = v; persist(); buildPlay(); });
   $('#opt-format-row').style.display = sel.mode === 'chaos' ? 'flex' : 'none';
   chips($('#opt-diff'), DIFF_NAMES.map((n, i) => [i, n]), sel.diff, v => { sel.diff = v; persist(); buildPlay(); });
   chips($('#opt-format'), [['elim', 'ELIMINATION'], ['stock', 'STOCK BATTLE (3 vidas)']], sel.format, v => { sel.format = v; persist(); buildPlay(); });
@@ -6836,13 +7084,13 @@ function buildPlay() {
     ac.appendChild(d);
   });
   $('#arena-name').textContent = ARENAS[sel.arena].name;
-  const MI = {duel_cpu: 'Depois de LUTAR você ajusta placar, vidas, tempo e o poder AWAKENING.', duel_local: 'Depois de LUTAR você ajusta placar, vidas, tempo e o poder AWAKENING. Cada jogador usa sua skin.', chaos: 'Você contra 3 bots em arena aberta, com armas caindo do céu.'};
+  const MI = {duel_cpu: 'Depois de LUTAR você ajusta placar, vidas, tempo e o poder AWAKENING.', duel_local: 'Depois de LUTAR você ajusta placar, vidas, tempo e o poder AWAKENING. Cada jogador usa sua skin.', chaos: 'Você contra 3 bots em arena aberta, com armas caindo do céu.', boss: 'Você contra um BOSS com os poderes das super armas (voa e tem 4 golpes). Derrote-o antes de gastar suas vidas. Escolha vidas, boss e nível da CPU.'};
   $('#mode-info').textContent = MI[sel.mode] + ' ' + (ARENAS[sel.arena].hazard ? 'Perigo: ' + ARENAS[sel.arena].hazard + '.' : '');
   const selEl = ac.querySelector('.sel'); if (selEl) selEl.scrollIntoView({block: 'nearest', inline: 'center'});
 }
 $('#btn-start').onclick = () => {
   SFX.resume(); SFX.play('go');
-  if (save.sel.mode === 'chaos') startSeries(baseCfg());
+  if (save.sel.mode === 'chaos' || save.sel.mode === 'boss') startSeries(baseCfg());
   else go('config');
 };
 
@@ -6853,6 +7101,7 @@ function roundTarget(R) { const n = R.score === 'custom' ? R.cRounds : +R.score;
 function baseCfg() {
   const s = save.sel;
   if (s.mode === 'chaos') return {mode: 'chaos', arena: s.arena, diff: s.diff, format: s.format, lives: 3, supers: true};
+  if (s.mode === 'boss') { const t = SUPERS[s.bossType] ? s.bossType : SUPER_IDS[(Math.random() * SUPER_IDS.length) | 0]; return {mode: 'boss', arena: s.arena, diff: s.diff, format: 'stock', lives: s.bossLives || 3, weapons: true, supers: false, camFx: true, boss: {type: t}}; }
   const R = save.rules[rulesKey()];
   const mode = s.mode, isAwk = !!R.awk;
   const lives = R.lives === 'custom' ? R.cLives : +R.lives;
@@ -7211,7 +7460,7 @@ function buildStats() {
 // ---------- partida / série de rodadas ----------
 let roundTimer = 0;
 function startSeries(base) {
-  const multi = base.mode !== 'chaos' && (base.score === 'board' || base.target > 0);
+  const multi = base.mode !== 'chaos' && base.mode !== 'boss' && (base.score === 'board' || base.target > 0);
   app.series = {base, rounds: multi, board: base.score === 'board', target: base.target || 0, score: [0, 0], round: 1, extra: 0,
     agg: {}, time: 0, names: []};
   launchRound();
@@ -7272,7 +7521,7 @@ function onMatchEnd() {
   F.forEach((f, i) => { const a = sr.agg[i] || (sr.agg[i] = {name: f.name, kills: 0, deaths: 0, dmg: 0, surv: 0, killW: []}); a.name = f.name; a.kills += f.kills; a.deaths += f.deaths; a.dmg += f.dmgDealt; a.surv += f.surviveT; a.killW = a.killW.concat([...f.killWeapons]); });
   sr.time += m.t;
   const w = res.winner;
-  if (sr.base.mode === 'chaos') { finishMatch(); return; }
+  if (sr.base.mode === 'chaos' || sr.base.mode === 'boss') { finishMatch(); return; }
   if (!w) { sr.extra++; showRound(res.timeUp ? 'EMPATE NO TEMPO' : 'EMPATE', 'RODADA EXTRA para desempatar', false); return; }
   if (sr.rounds) {
     sr.score[w === F[0] ? 0 : 1]++;
@@ -7376,7 +7625,7 @@ function finishMatch() {
   if (cfg.mode === 'duel_local') { coins = 10; lines.push('Partida local: +10'); }
   else {
     coins += 5; lines.push('Participação: +5');
-    if (pw) { const v = cfg.mode === 'chaos' ? 30 : 22; coins += v; lines.push('Vitória: +' + v); }
+    if (pw) { const v = cfg.mode === 'chaos' ? 30 : (cfg.mode === 'boss' ? 45 : 22); coins += v; lines.push('Vitória: +' + v); }
     if (kills) { coins += kills * 8; lines.push('Eliminações (' + kills + '): +' + kills * 8); }
     const sv = Math.min(12, Math.floor(surv / 15)); if (sv) { coins += sv; lines.push('Sobrevivência: +' + sv); }
     coins = Math.min(coins, 80);
@@ -7397,6 +7646,7 @@ function finishMatch() {
   let t, sub = '';
   if (!win) t = 'EMPATE!';
   else if (local) t = win.name + ' VENCEU!';
+  else if (cfg.mode === 'boss') { t = pw ? 'BOSS DERROTADO!' : 'O BOSS VENCEU'; sub = pw ? 'Você derrotou ' + F[1].name + ' (' + DIFF_NAMES[cfg.diff === undefined ? 1 : cfg.diff] + ')' : F[1].name + ' derrotou você. Tente de novo!'; }
   else if (cfg.mode === 'duel_cpu') { t = pw ? 'VITÓRIA!' : 'DERROTA'; sub = pw ? 'Você derrotou a CPU (' + DIFF_NAMES[cfg.diff] + ')' : 'A CPU venceu desta vez.'; }
   else { t = pw ? 'VITÓRIA!' : win.name + ' VENCEU'; sub = 'Último sobrevivente: ' + win.name; }
   if (m.result.timeUp && !sr.rounds) sub = 'Tempo esgotado — ' + (sub || 'decisão por vidas/vida restante');
@@ -7584,18 +7834,26 @@ $('#on-share').onclick = () => {
 
 function onlineRender() {
   if (!Net.role) return;
-  $('#on-code-big').textContent = Net.code || '------';
+  $('#on-code-big').textContent = Net.lan ? 'WI‑FI LOCAL' : (Net.code || '------');
+  $('#on-copy').classList.toggle('hidden', !!Net.lan); $('#on-share').classList.toggle('hidden', !!Net.lan); $('#lan-add').classList.toggle('hidden', !(Net.lan && Net.role === 'host'));
   const host = Net.role === 'host', P = Net.players;
   $('#on-count').textContent = P.length + '/4';
   lbSync();
   const o = Net.opts, ob = $('#on-opts'); ob.classList.toggle('ro', !host);
   const set = (id, items, cur, key) => chips($(id), items, cur, v => { if (!host) return; Net.setOpts({[key]: v}); save.net[key] = v; persist(); });
+  set('#on-o-mode', [['ffa', 'TODOS CONTRA TODOS'], ['boss', 'VS BOSS']], o.mode === 'boss' ? 'boss' : 'ffa', 'mode');
+  { const bo = o.mode === 'boss', bp = P.some(p => p.pid === o.boss) ? o.boss : 0;
+    $('#on-r-boss').classList.toggle('gone', !bo); $('#on-r-btype').classList.toggle('gone', !bo);
+    chips($('#on-o-boss'), P.map(p => [p.pid, p.name]), bp, v => { if (host) Net.setOpts({boss: v}); });
+    const mine = bo && Net.pid === bp; $('#on-r-btype').classList.toggle('mine', mine);
+    chips($('#on-o-btype'), [['random', 'ALEATÓRIA']].concat(SUPER_IDS.map(id => [id, SUPERS[id].name])), SUPERS[o.bossType] ? o.bossType : 'random', v => { if (host || mine) Net.setBossType(v); }); }
   set('#on-o-arena', ARENA_IDS.filter(a => a !== 'training').map(id => [id, ARENAS[id].name]), o.arena, 'arena');
   set('#on-o-lives', [1, 3, 5, 10].map(n => [n, String(n)]), o.lives, 'lives');
   set('#on-o-weap', [[true, 'LIGADAS'], [false, 'DESLIGADAS']], o.weapons !== false, 'weapons');
   set('#on-o-awk', [[true, 'LIGADO'], [false, 'DESLIGADO']], !!o.awk, 'awk');
   set('#on-o-sup', [[true, 'LIGADAS'], [false, 'DESLIGADAS']], o.supers !== false, 'supers');
   set('#on-o-fat', [[true, 'LIGADA'], [false, 'DESLIGADA']], !!o.fatality, 'fatality');
+  $('#on-o-fat').parentNode.classList.toggle('gone', o.mode === 'boss'); $('#on-o-sup').parentNode.classList.toggle('gone', o.mode === 'boss');
   const st = $('#on-start'); st.classList.toggle('hidden', !host); st.disabled = !Net.canStart();
   $('#on-status').textContent = host ? (P.length < 2 ? 'Aguardando pelo menos mais 1 jogador para iniciar…' : 'Pronto! Toque em INICIAR PARTIDA.') : 'Aguardando o host iniciar a partida…';
   const pg = $('#on-ping'); pg.classList.toggle('hidden', host); if (!host) pg.textContent = 'PING ' + (Net.ping || '--') + ' ms';
@@ -7618,7 +7876,7 @@ function lbBuild() {
     const S = {el: d, cv: d.querySelector('canvas'), name: d.querySelector('.pod-tag b'), sub: d.querySelector('.pod-tag small'), crown: d.querySelector('.pod-crown'), bub: d.querySelector('.pod-bubble'), baseTx: d.querySelector('.pod-base em'),
       m: null, key: '', has: false, cele: 0, bubT: 0};
     d.onclick = () => {
-      if (!S.has) { SFX.play('click'); $('#on-share').click(); return; }
+      if (!S.has) { SFX.play('click'); (Net.lan ? $('#lan-add') : $('#on-share')).click(); return; }
       if (Net.pid === i) { $('#lb-custom').click(); return; }
       S.cele = 2.2; SFX.play('click');
     };
@@ -7696,11 +7954,13 @@ Net.on.room = () => {
   else if (Net.phase === 'lobby' && !Net.opened) { /* host/cliente acabou de conectar enquanto a tela estava aberta */ }
 };
 Net.on.error = (msg) => {
+  lanClose();
   if (app.state === 'game' || app.state === 'result') { leaveGame('online'); }
   else if (!onlineScreenActive()) go('online');
   onlineView(false); onBusy(false); onMsg(msg, 'err'); toast(msg);
 };
 Net.on.lost = msg => {
+  lanClose();
   if (app.state === 'game' || app.state === 'result' || app.state === 'paused') leaveGame('online'); else go('online');
   onlineView(false); onBusy(false); onMsg(msg, 'err'); toast(msg);
 };
@@ -7714,7 +7974,7 @@ Net.on.end = res => {
 // o convidado entrou com sucesso → mostra a sala
 {
   const _room = Net.on.room;
-  Net.on.room = function () { if (Net.role && onlineScreenActive()) { onlineView(true); } _room(); };
+  Net.on.room = function () { if (Net.role && onlineScreenActive()) { onlineView(true); } if (LANUI.open && Net.players.length > LANUI.n0) lanClose(); else if (LANUI.open && Net.role === 'client' && Net.phase === 'lobby') lanClose(); _room(); };
 }
 
 function onlineToLobby() {
@@ -7748,14 +8008,15 @@ function onlineResult(res) {
   app.state = 'result'; Controls.reset(); $('#hud').classList.add('hidden'); $('#ctrl').classList.add('hidden'); SFX.duck(false);
   const me = Net.pid, row = res.rows.find(r => r.pid === me), win = res.winner === me, host = Net.role === 'host';
   const wname = (res.rows.find(r => r.pid === res.winner) || {}).name;
-  const t = $('#or-title'); t.textContent = res.draw ? 'EMPATE!' : win ? 'VITÓRIA!' : (wname || '?') + ' VENCEU'; t.classList.toggle('lose', !win);
+  const myWin = res.team ? !!(row && row.win) : win;
+  const t = $('#or-title'); t.textContent = res.draw ? 'EMPATE!' : res.team ? (myWin ? 'VITÓRIA!' : (res.team === 'hero' ? 'OS HERÓIS VENCERAM' : 'O BOSS VENCEU')) : win ? 'VITÓRIA!' : (wname || '?') + ' VENCEU'; t.classList.toggle('lose', !myWin);
   t.style.animation = 'none'; void t.offsetWidth; t.style.animation = '';
   const FT = res.fat && FATS[res.fat]; $('#or-sub').textContent = (FT ? 'Fatality: ' + FT.name + ' · ' : '') + 'Sala ' + Net.code + ' · Duração ' + Math.floor(res.time / 60) + ':' + String(res.time % 60).padStart(2, '0');
   let tb = '<table><tr><th>Lutador</th><th>Elim.</th><th>Mortes</th><th>Dano</th></tr>';
   res.rows.forEach(r => { tb += `<tr class="${r.win ? 'win' : ''}"><td>${r.win ? ico('crown') + ' ' : ''}${String(r.name).replace(/[<>&]/g, '')}${r.pid === me ? ' (você)' : ''}</td><td>${r.kills}</td><td>${r.deaths}</td><td>${r.dmg}</td></tr>`; });
   $('#or-table').innerHTML = tb + '</table>';
-  let coins = 5 + (win ? 20 : 0) + Math.min(30, (row ? row.kills : 0) * 5); coins = Math.min(coins, 45);
-  const st = save.stats; st.matches++; if (win) st.wins++; else if (!res.draw) st.losses++; if (row) { st.kills += row.kills; st.deaths += row.deaths; st.dmg += row.dmg; } st.time += res.time;
+  let coins = 5 + (myWin ? 20 : 0) + Math.min(30, (row ? row.kills : 0) * 5); coins = Math.min(coins, 45);
+  const st = save.stats; st.matches++; if (myWin) st.wins++; else if (!res.draw) st.losses++; if (row) { st.kills += row.kills; st.deaths += row.deaths; st.dmg += row.dmg; } st.time += res.time;
   save.coins += coins; persist(); updCoins();
   $('#or-coins').innerHTML = ico('coin') + ' +' + coins + ' moedas';
   const b = $('#or-lobby'); b.classList.toggle('hidden', !host);
@@ -7772,6 +8033,86 @@ setInterval(() => {
   if (Net.role && onlineScreenActive() && !$('#on-room').classList.contains('hidden')) onlineRender();
 }, 700);
 window.__NET = Net;
+
+
+// ---------------------------------------------------------------- Wi‑Fi local: interface
+const LANUI = {open: false, mode: '', n0: 1, busy: false, stream: null, raf: 0};
+function lanMsg(t, c) { const e = $('#lan-msg'); e.textContent = t || ''; e.className = 'on-msg' + (c ? ' ' + c : ''); }
+function lanStop() { cancelAnimationFrame(LANUI.raf); if (LANUI.stream) { LANUI.stream.getTracks().forEach(t => t.stop()); LANUI.stream = null; } $('#lan-vid').classList.add('hidden'); }
+function lanClose() { if (!LANUI.open) return; lanStop(); LANUI.open = false; $('#lan-modal').classList.add('hidden'); }
+function lanShowCode(code) {
+  $('#lan-code').value = code; $('#lan-out').classList.remove('hidden');
+  try { QR.draw($('#lan-qr'), code, 6); $('#lan-qr').classList.remove('hidden'); } catch (e) { $('#lan-qr').classList.add('hidden'); }
+}
+function lanOpen(mode) {
+  LANUI.open = true; LANUI.mode = mode; LANUI.busy = false; LANUI.n0 = Net.players.length;
+  $('#lan-modal').classList.remove('hidden'); lanMsg(''); lanStop(); $('#lan-paste').value = ''; $('#lan-code').value = '';
+  $('#lan-scan').classList.toggle('hidden', !(window.BarcodeDetector && navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
+  if (mode === 'host') {
+    $('#lan-title').textContent = 'ADICIONAR JOGADOR';
+    $('#lan-s1').classList.add('hidden'); $('#lan-s2').classList.remove('hidden');
+    $('#lan-h2').textContent = '1) O amigo toca em “ENTRAR NA REDE” e te mostra o código (ou QR) dele. 2) Cole/escaneie aqui e toque em GERAR RESPOSTA.';
+    $('#lan-go span').textContent = 'GERAR RESPOSTA';
+  } else {
+    $('#lan-title').textContent = 'ENTRAR NA REDE LOCAL';
+    $('#lan-s1').classList.remove('hidden'); $('#lan-s2').classList.remove('hidden'); $('#lan-out').classList.add('hidden');
+    $('#lan-h1').textContent = '1) Mostre este código (ou QR) ao anfitrião e peça a resposta dele.';
+    $('#lan-h2').textContent = '2) Cole/escaneie a RESPOSTA do anfitrião aqui:';
+    $('#lan-go span').textContent = 'CONECTAR';
+    lanMsg('Gerando código…');
+  }
+}
+$('#lan-host').onclick = () => {
+  SFX.resume(); SFX.play('click'); onSaveAdv(); if (!Net.supported()) { onMsg('WebRTC indisponível neste navegador.', 'err'); return; }
+  const sk = onlineSkin(); lbSkinKey = JSON.stringify(sk); Net.lanHost(onName(), sk); lbChatReset(); onlineView(true); onlineRender();
+  lanOpen('host');
+};
+$('#lan-add').onclick = () => { SFX.play('click'); if (Net.role === 'host' && Net.lan) { if (Net.phase === 'play') { toast('Aguarde a partida terminar.'); return; } lanOpen('host'); } };
+$('#lan-join').onclick = async () => {
+  SFX.resume(); SFX.play('click'); onSaveAdv(); if (!Net.supported()) { onMsg('WebRTC indisponível neste navegador.', 'err'); return; }
+  const sk = onlineSkin(); lbSkinKey = JSON.stringify(sk); lbChatReset(); lanOpen('join');
+  try { const code = await Net.lanJoin(onName(), sk); if (!LANUI.open) return; lanShowCode(code); lanMsg(''); }
+  catch (e) { lanMsg('Não foi possível gerar o código (rede local indisponível neste navegador).', 'err'); }
+};
+$('#lan-go').onclick = async () => {
+  if (LANUI.busy) return; const code = $('#lan-paste').value; SFX.play('click');
+  if (!code.trim()) { lanMsg('Cole o código primeiro.', 'err'); return; }
+  LANUI.busy = true; lanStop();
+  try {
+    if (LANUI.mode === 'host') {
+      lanMsg('Gerando resposta…'); const ans = await Net.lanAccept(code);
+      $('#lan-s1').classList.remove('hidden'); $('#lan-s2').classList.add('hidden');
+      $('#lan-h1').textContent = 'Resposta pronta! Mostre este código (ou QR) ao amigo e peça para ele tocar em CONECTAR. Esta janela fecha sozinha quando ele entrar.';
+      lanShowCode(ans); lanMsg('Aguardando o amigo conectar…', 'ok'); $('#lan-close span').textContent = 'PRONTO';
+    } else {
+      lanMsg('Conectando…'); await Net.lanFinish(code); $('#lan-go').disabled = true; lanMsg('Conectando ao anfitrião…', 'ok');
+      setTimeout(() => { $('#lan-go').disabled = false; }, 20000);
+    }
+  } catch (e) {
+    lanMsg(e && e.message === 'full' ? 'Sala cheia.' : 'Código inválido. Confira se copiou inteiro (começa com SM1~) e se é o código certo.', 'err');
+  }
+  LANUI.busy = false;
+};
+$('#lan-close').onclick = () => {
+  SFX.play('click'); const was = LANUI.mode; lanClose(); $('#lan-close span').textContent = 'FECHAR';
+  if (was === 'join' && Net.role === 'client' && Net.phase === 'connecting') { Net.leave(true); onlineView(false); onBusy(false); onMsg(''); }
+};
+$('#lan-copy').onclick = () => { SFX.play('click'); onCopy($('#lan-code').value); };
+$('#lan-share').onclick = () => { SFX.play('click'); const t = $('#lan-code').value; if (navigator.share) navigator.share({title: 'STICK MAYHEM', text: t}).catch(() => {}); else onCopy(t); };
+$('#lan-paste').addEventListener('keydown', e => e.stopPropagation());
+$('#lan-scan').onclick = async () => {
+  SFX.play('click');
+  try {
+    const det = new BarcodeDetector({formats: ['qr_code']}), v = $('#lan-vid');
+    LANUI.stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment'}}); v.srcObject = LANUI.stream; v.classList.remove('hidden'); await v.play();
+    const loop = async () => {
+      if (!LANUI.stream) return;
+      try { const r = await det.detect(v); if (r.length && /SM1~/.test(r[0].rawValue)) { $('#lan-paste').value = r[0].rawValue; lanStop(); lanMsg('QR lido!', 'ok'); $('#lan-go').click(); return; } } catch (e) {}
+      LANUI.raf = requestAnimationFrame(loop);
+    };
+    loop();
+  } catch (e) { lanStop(); lanMsg('Não consegui abrir a câmera. Cole o código no campo.', 'err'); }
+};
 
 'use strict';
 /* STICK MAYHEM v1.5.0 — abertura: splash Mayhem Games (fundo preto) → tela "aperte qualquer botão" */
