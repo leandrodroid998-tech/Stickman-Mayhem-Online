@@ -546,6 +546,13 @@ body.cust-net #cp-tog{display:none}
 .lb-left .on-btns{flex-wrap:nowrap;gap:.5em;justify-content:stretch}.lb-left .on-btns .btn{white-space:nowrap;padding:.75em .9em;font-size:.88em}.lb-left .on-btns #on-start{flex:1}
 .lb-left .on-status{font-size:.9em;min-height:1.2em}
 
+/* ====== v1.7.0 — SUPER ARMAS ====== */
+body.boss0 #pad0 .cb.awk,body.boss1 #pad1 .cb.awk{display:flex}
+.cb[data-l]{position:relative}
+.cb[data-l]::after{content:attr(data-l);position:absolute;left:50%;bottom:-.1em;transform:translate(-50%,0);font:800 .5em/1 system-ui,sans-serif;letter-spacing:.02em;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000,0 0 3px #000;pointer-events:none;white-space:nowrap}
+.cb.cdn{filter:saturate(.3) brightness(.7)}
+.cb.awk[data-l]{opacity:1}
+
 </style>
 </head>
 <body>
@@ -697,6 +704,7 @@ body.cust-net #cp-tog{display:none}
               <div class="opt"><label>Vidas</label><div class="chips" id="on-o-lives"></div></div>
               <div class="opt"><label>Armas</label><div class="chips" id="on-o-weap"></div></div>
               <div class="opt"><label>AWAKENING</label><div class="chips" id="on-o-awk"></div></div>
+              <div class="opt"><label>SUPER ARMAS</label><div class="chips" id="on-o-sup"></div></div>
               <div class="opt"><label>FATALITY</label><div class="chips" id="on-o-fat"></div></div></div></div>
           </div>
         </div>
@@ -821,7 +829,7 @@ body.cust-net #cp-tog{display:none}
 'use strict';
 const GFX = {low: false}; // gráficos: Baixo = menos partículas/animações/resolução
 /* STICK MAYHEM — dados: armas, arenas, cosméticos, desafios */
-const WORLD_W = 1280, WORLD_H = 720, VERSION = 'v1.6.0';
+const WORLD_W = 1280, WORLD_H = 720, VERSION = 'v1.7.0';
 const GRAV = 2300;
 
 /* ---------- ícones vetoriais (traço 24x24, estilo linha) ---------- */
@@ -957,6 +965,19 @@ const ARENAS = {
     plats:[S(120,560,150,24), S(1010,560,150,24), S(560,520,160,24), S(330,410,130,24), S(820,410,130,24), S(560,290,160,24), S(150,290,110,24), S(1020,290,110,24),
       O(440,200,110,{move:{ax:110,ay:0,spd:0.8,ph:0}})],
     spawns:[{x:195,y:560},{x:1085,y:560},{x:395,y:410},{x:885,y:410}]},
+  rio: {id:'rio', name:'Rio de Janeiro', desc:'Calçadão ao pôr do sol, com Pão de Açúcar e o Cristo ao fundo. Sem abismo: a rua é toda fechada.', hazard:'Nenhum · rua fechada, só HP',
+    theme:{plat:'#6b5b4b', top:'#fbbf24', glow:'#fff7ed', a:'#7c3aed', b:'#fb923c'}, killY:1200, closed:true,
+    plats:[S(0,610,1280,110), S(-80,-400,100,1300), S(1260,-400,100,1300), O(160,470,240), O(880,470,240), O(525,345,230), S(600,550,80,60)],
+    spawns:[{x:260,y:610},{x:1020,y:610},{x:280,y:470},{x:1000,y:470}]},
+  mine: {id:'mine', name:'Pixel Craft', desc:'Mundo de blocos: grama, pedra, madeira e nuvens quadradas. Sem abismo.', hazard:'Nenhum · mundo fechado, só HP',
+    theme:{plat:'#866043', top:'#5dbb3a', glow:'#ffffff', a:'#7dc7ff', b:'#cdeaff'}, killY:1200, closed:true,
+    plats:[S(0,600,1280,120), S(-80,-400,100,1300), S(1260,-400,100,1300), S(520,560,240,40), S(560,520,160,40), O(120,440,200), O(960,440,200), O(520,360,240), O(320,270,120), O(840,270,120)],
+    spawns:[{x:240,y:600},{x:1040,y:600},{x:220,y:440},{x:1060,y:440}]},
+  train: {id:'train', name:'Estação · Trem', desc:'Um trem cruza a via sem parar. Sinal vermelho = saia do chão! Quem for atingido pode ser eliminado.', hazard:'TREM MORTAL · sinal e buzina avisam',
+    theme:{plat:'#3f4654', top:'#facc15', glow:'#fde68a', a:'#0f172a', b:'#334155'}, killY:1200, closed:true,
+    train:{first:5, period:9.5, warn:2.4, speed:1750, len:1050, y0:468, y1:616, dmg:70},
+    plats:[S(0,612,1280,108), S(-80,-400,100,1300), S(1260,-400,100,1300), O(60,430,300), O(920,430,300), O(450,340,380)],
+    spawns:[{x:200,y:612},{x:1080,y:612},{x:200,y:430},{x:1080,y:430}]},
   training: {id:'training', name:'Training Room', desc:'Sala simples, com paredes. Ideal para aprender.', hazard:'Nenhum',
     theme:{plat:'#475569', top:'#93c5fd', glow:'#fff', a:'#cbd5e1', b:'#94a3b8'}, killY:900, training:true,
     plats:[S(0,600,1280,120), S(-60,-200,80,1000), S(1260,-200,80,1000), O(280,450,220), O(780,450,220), O(520,320,240)],
@@ -1258,12 +1279,28 @@ const SFX = (() => {
     winv_royal() { [523, 659, 784, 1046, 1318].forEach((f, i) => tone(f, .45, 'triangle', .12, 0, i * .11)); },
     winv_mayhem() { tone(330, .12, 'square', .1, 200); tone(660, .1, 'triangle', .08, 0, .05); },
     fat_win() { [392, 523, 659, 784, 1046].forEach((f, i) => tone(f, .35, 'square', .12, 0, i * .1)); tone(130, .8, 'sine', .3, 40); },
+    sup_drop() { tone(900, .9, 'sawtooth', .2, -800); nz(.8, .25, 3000, 'lowpass', -2500); tone(70, .6, 'sine', .4, -30, .7); },
+    sup_pick() { [196, 294, 392, 587, 784].forEach((f, i) => tone(f, .5, 'sawtooth', .13, 0, i * .07)); tone(60, 1, 'sine', .45, -20); nz(.7, .22, 600, 'lowpass', 3000); },
+    sup_charge() { tone(120, 1.1, 'sawtooth', .13, 500); nz(1.1, .16, 400, 'bandpass', 2500); },
+    sup_beam() { tone(220, 1, 'sawtooth', .18, -60); tone(440, 1, 'square', .08, 40); nz(1, .22, 1500, 'bandpass', 0); },
+    sup_ki() { tone(900, .1, 'square', .1, -500); },
+    sup_tp() { tone(1500, .18, 'sine', .15, -1200); nz(.12, .12, 5000, 'highpass'); },
+    sup_ice() { nz(.9, .2, 5000, 'highpass', -3000); tone(1800, .5, 'triangle', .06, -900); },
+    sup_gem() { tone(520, .2, 'triangle', .14, 300); tone(780, .25, 'sine', .1, 200, .04); },
+    sup_time() { tone(880, .9, 'sine', .2, -780); tone(440, .9, 'triangle', .12, -380, .1); },
+    sup_snap() { nz(.3, .5, 3000, 'lowpass'); tone(90, 1.4, 'sine', .5, -60); tone(1200, .6, 'sawtooth', .1, -1100); },
+    sup_hammer() { tone(180, .25, 'square', .16, -100); nz(.2, .2, 900); },
+    sup_thunder() { nz(1, .3, 500, 'lowpass', 400); tone(60, 1, 'sawtooth', .25, -20); },
+    sup_zap() { nz(.35, .4, 2500, 'bandpass', 1500); tone(90, .4, 'square', .22, -50); tone(1400, .15, 'sawtooth', .1, -1000); },
+    sup_boom() { nz(.9, .5, 700, 'lowpass', -500); tone(70, .8, 'sine', .55, -40); },
+    train_horn() { tone(392, .7, 'sawtooth', .22, 0); tone(494, .7, 'sawtooth', .2, 0); tone(392, .7, 'sawtooth', .22, 0, .9); tone(494, .7, 'sawtooth', .2, 0, .9); },
+    train_pass() { nz(1.6, .45, 400, 'lowpass', 200); tone(55, 1.6, 'sawtooth', .3, 10); tone(1200, .5, 'square', .05, -300); },
     react() { tone(620, .07, 'square', .08, 0); tone(930, .12, 'triangle', .09, 0, .05); },
     buy() { tone(880, .1, 'triangle', .2); tone(1320, .2, 'triangle', .2, 0, .08); },
   };
   function play(n) {
     if (!ctx || S.muted || S.sfx <= 0) return;
-    if (budget > 12 && n.slice(0, 4) !== 'awk_' && n.slice(0, 4) !== 'fat_') return;
+    if (budget > 12 && n.slice(0, 4) !== 'awk_' && n.slice(0, 4) !== 'fat_' && n.slice(0, 4) !== 'sup_' && n.slice(0, 6) !== 'train_') return;
     budget++;
     const f = SND[n]; if (f) try { f(); } catch (e) {}
   }
@@ -1466,7 +1503,7 @@ class Fighter {
     this.phase = 0; this.celebrate = false; this.winAnim = 0; this.hopT = 0; this.celeT = 0;
     this.capeN = []; for (let i = 0; i < 7; i++) this.capeN.push({x: 0, y: 0, px: 0, py: 0});
     this.energy = 0; this.awk = null; this.awkLock = 0; this.chain = 0; this.chainT = -9; this.readyT = 0; this.dmgMul = 1;
-    this.awkType = (o.skin && o.skin.awk) || 'void'; this.awkUses = 0;
+    this.awkType = (o.skin && o.skin.awk) || 'void'; this.awkUses = 0; this.sup = null; this.baseMax = 100;
     this.reset(o.spawn || {x: 640, y: 600}, true);
   }
   reset(sp, first) {
@@ -1478,6 +1515,7 @@ class Fighter {
     this.respawnT = 0; this.getUpT = 0; this.zapCd = 0; this.lastHit = null; this.hitSet = []; this.lunged = false; this.aimA = 0;
     this.wAng = -0.9; this.dashHit = []; this.deadT = 0; this.fell = false;
     this.pose(); for (let i = 0; i < 11; i++) { const p = this.pts[i], t = this.T[i]; p.x = p.px = t.x; p.y = p.py = t.y; }
+    if (this.sup) endSuper(this);
     this.awk = null; this.awkLock = 0; if (first) { this.energy = 0; this.chain = 0; this.chainT = -9; }
     this.capeReset();
   }
@@ -1634,6 +1672,7 @@ class Fighter {
     }
   }
   toRagdoll(kx, ky, stun, hx, hy) {
+    if (this.sup) return;
     if (!this.ragdoll) {
       this.ragdoll = true;
       for (let i = 0; i < 11; i++) { const p = this.pts[i]; p.px = p.x - this.vx * DT; p.py = p.y - this.vy * DT; }
@@ -1677,7 +1716,8 @@ class Fighter {
     if (!this.alive || this.invuln > 0) return false;
     const m = this.m;
     if (wid !== 'awk') dmg *= by ? (by.dmgMul || 1) : (m.envMul || 1);
-    if (this.awk) { dmg *= 0.5; kx *= 0.15; ky *= 0.15; }   // super armadura durante o AWAKENING
+    if (this.awk) { dmg *= 0.5; kx *= 0.15; ky *= 0.15; }
+    if (this.sup) { kx *= 0.12; ky *= 0.12; }   // super armadura durante o AWAKENING
     const hp0 = this.hp;
     this.hp -= dmg; this.flash = 0.12; this.lastHit = {by, t: m.time, wid};
     if (by && by !== this && dmg > 0) by.gainEnergy(Math.min(dmg, Math.max(0, hp0)), this, wid);
@@ -1689,6 +1729,7 @@ class Fighter {
     const kmag = Math.hypot(kx, ky);
     this.poise += kmag * 0.45;
     if (this.hp <= 0) { this.die(kx, ky, by, wid); return true; }
+    if (this.sup) { this.hitstun = 0; return true; }
     if (this.ragdoll) { this.toRagdoll(kx, ky, 0.5 + kmag / 2200, hx, hy); }
     else if (kmag > 560 || this.poise > 640 || (!this.grounded && kmag > 380)) {
       this.poise = 0; this.toRagdoll(kx, ky, clamp(0.4 + kmag / 1100, 0.5, 2.0), hx, hy);
@@ -1703,6 +1744,7 @@ class Fighter {
   die(kx, ky, by, wid, cause) {
     if (!this.alive) return;
     const m = this.m;
+    if (this.sup) endSuper(this);
     this.alive = false; this.hp = 0; this.lives--; this.deaths++; this.deadT = 0; this.elimTime = m.t; this.awk = null;
     let killer = by;
     if (!killer && this.lastHit && m.time - this.lastHit.t < 5) { killer = this.lastHit.by; wid = this.lastHit.wid; }
@@ -1744,6 +1786,7 @@ class Fighter {
       this.checkBounds(); I.jumpP = I.spP = I.dropP = I.awkP = false; return;
     }
     const frozen = m.frozen;
+    if (this.sup) { this.updateSuper(dt); return; }
     if (I.awkP && this.canAwk()) this.startAwk();
     if (this.awk) { if (AWK2[this.awk.type]) this.updateAwk2(dt); else this.updateAwk(dt); I.jumpP = I.spP = I.dropP = I.awkP = false; return; }
     const mx = frozen ? 0 : I.mx;
@@ -2064,6 +2107,7 @@ class Match {
     if (cfg.mode === 'preview' || cfg.mode === 'awkprev' || this.fatMode) { this.state = 'play'; this.frozen = false; this.cdT = 0; }
     if (env.netClient) this.frozen = true;
     else if (cfg.mode !== 'preview' && cfg.mode !== 'awkprev' && !this.fatMode) for (let i = 0; i < 2; i++) this.spawnWeapon();
+    this.supInit();
   }
   buildFighters() {
     const cfg = this.cfg, env = this.env, sp = this.arena.spawns, inp = env.inputs || [newInput(), newInput()];
@@ -2155,6 +2199,7 @@ class Match {
   danger(x, y) {
     const a = this.arena;
     if (a.zaps) for (const z of a.zaps) { const ph = this.time % z.period; if (ph > z.period - z.on - 1.0 && x > z.x - 30 && x < z.x + z.w + 30 && y > z.y - 20 && y < z.y + z.h + 40) return true; }
+    if (a.train) { const st = trainState(a, this.time); if (st && (st.warn || st.active) && y > a.train.y0 - 10) return true; }
     for (const mi of this.mines) if (mi.armed && Math.abs(mi.x - x) < 80 && Math.abs(mi.y - y) < 60) return true;
     for (const b of this.bombs) if (Math.abs(b.x - x) < 130 && Math.abs(b.y - y) < 130) return true;
     for (const pr of this.projs) if (!pr.owner && Math.abs(pr.x - x) < 70 && pr.y < y + 30 && pr.y > y - 220) return true;
@@ -2280,12 +2325,15 @@ class Match {
     if (!this.fatMode) this.hazards(dt);
     // IA
     for (const f of this.fighters) if (f.brain) f.brain.update(dt, this);
+    this.supBrain(dt);
     const cn = this.cine; cn.tDim = 0; cn.tZoom = 1; cn.tLight = 0; cn.tDist = 0;
     if (this.fatMode) this.fatUpdate(dt);
     for (const f of this.fighters) f.update(dt);
     this.updateCine(dt);
     this.fighterPush();
     this.updateItems(dt);
+    this.supUpdate(dt);
+    this.supProjsStep(dt);
     this.updateProjs(dt);
     this.updateBombs(dt);
     this.updateMines(dt);
@@ -2308,6 +2356,7 @@ class Match {
       this.fireT -= dt;
       if (this.fireT <= 0) { this.fireT = rnd(2.2, 3.6); this.addProj({kind: 'fire', x: rnd(120, 1160), y: -30, vx: rnd(-90, 90), vy: 420, life: 5, dmg: 14, knock: 520, owner: null, wid: 'fire', grav: 120, exp: null}); }
     }
+    if (a.train && this.state === 'play') this.trainHazard(dt);
     if (a.zaps && this.state === 'play') {
       for (const z of a.zaps) {
         const ph = this.time % z.period, on = ph > z.period - z.on;
@@ -2315,6 +2364,23 @@ class Match {
         if (on) for (const f of this.fighters) {
           if (!f.alive || f.invuln > 0 || f.zapCd > 0) continue;
           if (f.cx > z.x && f.cx < z.x + z.w && f.y > z.y && f.y - 20 < z.y + z.h && !f.ragdoll) { f.zapCd = 0.7; f.hurt(10, (f.cx < z.x + z.w / 2 ? -1 : 1) * 500, -650, null, 'zap', f.cx, f.y - 30); SFX.play('zap'); this.fx.burst(f.cx, f.y - 20, 10, 400, 0.3, 3, '#a5f3fc', 300, 0); }
+        }
+      }
+    }
+  }
+  trainHazard(dt) {
+    const a = this.arena, T = a.train, st = trainState(a, this.time); if (!st) return;
+    if (st.warn && this._trW !== st.k) { this._trW = st.k; SFX.play('train_horn'); this.fx.addShake(3); }
+    if (st.active && this._trR !== st.k) { this._trR = st.k; SFX.play('train_pass'); this.fx.addShake(8); this.fx.flash = 0.05; }
+    if (!st.active) return;
+    this._trS = (this._trS || 0) - dt; if (this._trS <= 0) { this._trS = 0.15; this.fx.addShake(3); }
+    for (const f of this.fighters) {
+      if (!f.alive || f.trainK === st.k) continue;
+      const h = f.pts[HIP], hx = h.x, hy = f.ragdoll ? h.y : f.y - 44;
+      if (hx > st.x0 - 18 && hx < st.x1 + 18 && hy > T.y0 && hy < T.y1 + 40) {
+        if (f.hurt(T.dmg, st.dir * 1700, -800, null, 'train', hx, hy)) {
+          f.trainK = st.k; this.fx.burst(hx, hy, 24, 700, 0.6, 4, '#fde68a', 200, 0); this.fx.ring(hx, hy, 100, 0.4, '#fff', 6); SFX.play('sup_boom');
+          if (f.alive && !f.sup) f.toRagdoll(st.dir * 1700, -800, 2.2);
         }
       }
     }
@@ -2351,6 +2417,7 @@ class Match {
     const P = this.projs;
     for (let i = P.length - 1; i >= 0; i--) {
       const p = P[i];
+      if (p.sup) continue;
       if (p.kind === 'boomerang') { if (this.updateBoom(p, dt)) { if (p.owner) p.owner.boomN = Math.max(0, p.owner.boomN - 1); P.splice(i, 1); } continue; }
       const ox = p.x, oy = p.y;
       p.vy += (p.grav || 0) * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
@@ -2545,7 +2612,7 @@ Object.assign(Fighter.prototype, {
   },
   canAwk() {
     const m = this.m, A = m.cfg.awk;
-    return !!(A && A.on && this.energy >= 100 && this.alive && !this.ragdoll && !this.awk && this.awkLock <= 0 && this.hitstun <= 0 &&
+    return !!(A && A.on && !this.sup && this.energy >= 100 && this.alive && !this.ragdoll && !this.awk && this.awkLock <= 0 && this.hitstun <= 0 &&
       this.getUpT <= 0 && !m.frozen && m.state === 'play' && !m.ended && !this.celebrate && this.foe());
   },
   startAwk() {
@@ -3666,6 +3733,467 @@ const AWK2R = {
 };
 
 'use strict';
+/* STICK MAYHEM v1.7 — SUPER ARMAS: 1 por partida, vira um BOSS voador com 4 ataques.
+   Nomes e visuais são originais (inspirados em arquétipos, sem usar personagens de terceiros). */
+const SUPERS = {
+  ki: {name: 'MESTRE KI', sub: 'ONDA DE KI', c: '#fbbf24', c2: '#fff7c2', sc: 1.32, hp: 280, spd: 400, ico: 'KI',
+    mv: ['KI', 'ONDA', 'TELEPORTE', 'ESFERA']},
+  steel: {name: 'ÁGUIA DE AÇO', sub: 'HERÓI DE AÇO', c: '#3b82f6', c2: '#ef4444', sc: 1.34, hp: 280, spd: 470, ico: 'AÇO',
+    mv: ['SOCO', 'LASER', 'GELO', 'MERGULHO']},
+  titan: {name: 'TITÃ DAS JOIAS', sub: 'MANOPLA DAS 4 JOIAS', c: '#a855f7', c2: '#fde047', sc: 1.45, hp: 300, spd: 340, ico: 'JOIA',
+    mv: ['JOIA', 'ATRAÇÃO', 'TEMPO', 'ESTALO']},
+  thunder: {name: 'DEUS DO TROVÃO', sub: 'MARTELO DA TEMPESTADE', c: '#fde047', c2: '#60a5fa', sc: 1.36, hp: 280, spd: 430, ico: 'RAIO',
+    mv: ['MARTELO', 'RAIOS', 'INVESTIDA', 'TEMPESTADE']}
+};
+const SUPER_IDS = Object.keys(SUPERS);
+const SUP_BANNER_T = 3.2;
+
+function supDir(f) {
+  const I = f.input; let dx, dy;
+  if (I.aimX || I.aimY) { dx = I.aimX; dy = I.aimY; }
+  else {
+    dx = f.facing; dy = clamp(I.my, -1, 1) * 0.6; if (Math.abs(I.mx) > 0.3) dx = sgn(I.mx);
+    const foe = Math.abs(I.my) < 0.5 ? supNear(f) : null;       // mira assistida (toque/teclado): vai no inimigo que está à frente
+    if (foe && (foe.cx - f.cx) * dx > 0) { dx = foe.cx - f.cx; dy = foe.cy - f.pts[CHEST].y; }
+  }
+  const l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l];
+}
+function supFoes(f) { return f.m.fighters.filter(e => e !== f && e.alive && !e.out); }
+function supNear(f) { let b = null, bd = 1e9; for (const e of supFoes(f)) { const d = Math.hypot(e.cx - f.cx, e.cy - f.cy); if (d < bd) { bd = d; b = e; } } return b; }
+function supHurt(f, t, dmg, kx, ky, hx, hy) { return t.hurt(dmg, kx, ky, f, 'sup', hx === undefined ? t.cx : hx, hy === undefined ? t.cy : hy); }
+function supP(m, kind, x, y, vx, vy, life, o) {
+  const p = Object.assign({kind, x, y, vx, vy, life, rot: 0, sup: true, hit: [], owner: null, wid: 'sup', dmg: 10, knock: 400, r: 10}, o);
+  m.addProj(p); return p;
+}
+function supBoom(m, owner, x, y, R, dmg, knock, col) {
+  const fx = m.fx; col = col || '#ffd27a';
+  fx.burst(x, y, 30, 680, 0.8, 6, col, 200, 0); fx.burst(x, y, 14, 440, 0.9, 10, '#fff', -80, 1);
+  fx.ring(x, y, R * 1.2, 0.5, col, 8); fx.ring(x, y, R * 0.7, 0.35, '#fff', 5);
+  m.addShock(x, y, 10, R * 1.3, 0.5, col, 8);
+  fx.addShake(R / 12); fx.flash = 0.1; m.hitstop = Math.max(m.hitstop, 0.05);
+  SFX.play('sup_boom');
+  for (const f of m.fighters) {
+    if (f === owner || !f.alive || f.invuln > 0) continue;
+    const dx = f.cx - x, dy = f.cy - y, d = Math.hypot(dx, dy); if (d > R + 20) continue;
+    const k = clamp(1 - d / (R + 20), 0.15, 1), nx = dx / (d || 1), ny = dy / (d || 1);
+    f.hurt(dmg * (0.4 + 0.6 * k), nx * knock * (0.5 + k), ny * knock * (0.5 + k) - 260, owner, 'sup', f.cx, f.cy);
+  }
+}
+function supFly(f, dx, dy) { f.vx = dx; f.vy = dy; }
+
+// ---------- pose de braços ----------
+const _so = {};
+function supArms(f, mode, dx, dy) {
+  const T = f.T, ch = T[CHEST], fx = f.facing; let hr, hl;
+  switch (mode) {
+    case 'fwd': hr = [ch.x + dx * 30, ch.y + 4 + dy * 30]; hl = [ch.x + dx * 26, ch.y + 8 + dy * 26]; break;
+    case 'beam': hr = [ch.x + dx * 24, ch.y + 4 + dy * 24]; hl = [ch.x + dx * 22, ch.y + 7 + dy * 22]; break;
+    case 'back': hr = [ch.x - fx * 18, ch.y + 8]; hl = [ch.x - fx * 15, ch.y + 13]; break;
+    case 'up': hr = [ch.x + fx * 9, ch.y - 36]; hl = [ch.x - fx * 9, ch.y - 36]; break;
+    case 'punch': hr = [ch.x + dx * 42, ch.y + dy * 42]; hl = [ch.x - fx * 12, ch.y + 12]; break;
+    case 'spread': hr = [ch.x + fx * 36, ch.y - 12]; hl = [ch.x - fx * 36, ch.y - 12]; break;
+    case 'fly': hr = [ch.x + dx * 40, ch.y - 4 + dy * 40]; hl = [ch.x - fx * 6, ch.y + 14]; break;
+    default: return;
+  }
+  ik(ch.x, ch.y, hl[0], hl[1], 18, 18, fx, _so); T[ELL].x = _so.ex; T[ELL].y = _so.ey; T[HDL].x = _so.hx; T[HDL].y = _so.hy;
+  ik(ch.x, ch.y, hr[0], hr[1], 18, 18, fx, _so); T[ELR].x = _so.ex; T[ELR].y = _so.ey; T[HDR].x = _so.hx; T[HDR].y = _so.hy;
+}
+
+// ---------- tabela de golpes ----------
+// cada golpe: {cd, T (duração), lock (velocidade de movimento), arms, start(f,a), tick(f,a,dt)}
+const SUP_MOVES = {
+  ki: [
+    {cd: 0.5, T: 0.38, lock: 0.6, arms: 'fwd', start(f, a) { a.fired = 0; },
+      tick(f, a) {
+        const times = [0.04, 0.16, 0.28];
+        while (a.fired < 3 && a.t >= times[a.fired]) {
+          a.fired++; const d = supDir(f), sp = (Math.random() - 0.5) * 0.12, c = Math.cos(sp), s = Math.sin(sp), dx = d[0] * c - d[1] * s, dy = d[0] * s + d[1] * c, P = f.pts[CHEST];
+          supP(f.m, 'kiball', P.x + dx * 30, P.y + dy * 30, dx * 900, dy * 900, 1.3, {owner: f, dmg: 8, knock: 380, r: 12});
+          SFX.play('sup_ki'); f.m.fx.burst(P.x + dx * 30, P.y + dy * 30, 4, 200, 0.2, 3, '#fff7c2', 0, 0);
+        }
+      }},
+    {cd: 7, T: 2.0, lock: 0.05, arms: null, start(f, a) { a.dir = supDir(f); f.facing = a.dir[0] >= 0 ? 1 : -1; SFX.play('sup_charge'); },
+      tick(f, a) {
+        a.arm = a.t < 0.95 ? 'back' : 'beam';
+        if (a.t < 0.95) { a.dir = supDir(f); f.facing = a.dir[0] >= 0 ? 1 : -1; }
+        if (a.t < 0.95 && Math.random() < 0.6) { const P = f.pts[CHEST]; f.m.fx.add(P.x - f.facing * 20 + rnd(-40, 40), P.y + rnd(-40, 40), 0, 0, 0.25, 3, '#a5f3fc', 0, 0); }
+        if (!a.fired && a.t >= 0.95) {
+          a.fired = 1; const P = f.pts[CHEST], d = a.dir;
+          supP(f.m, 'beam_ki', P.x + d[0] * 26, P.y + d[1] * 26, d[0], d[1], 1.0, {owner: f, dmg: 9, knock: 300, len: 1300, w: 38, tick: 0});
+          SFX.play('sup_beam'); f.m.fx.addShake(10); f.m.fx.flash = 0.08;
+        }
+      }},
+    {cd: 5, T: 0.55, lock: 0.1, arms: 'punch',
+      can(f) { return !!supNear(f); },
+      start(f, a) { a.did = 0; a.did2 = 0; f.m.fx.burst(f.cx, f.cy, 14, 300, 0.4, 3, '#fff7c2', 0, 0); f.m.fx.ring(f.cx, f.cy, 50, 0.3, '#fff', 4); SFX.play('sup_tp'); },
+      tick(f, a) {
+        const foe = supNear(f);
+        if (!a.did && a.t >= 0.12 && foe) {
+          a.did = 1; const side = f.x < foe.x ? 1 : -1;
+          f.x = clamp(foe.x + side * 78, 50, WORLD_W - 50); f.y = foe.y; f.vx = f.vy = 0; f.facing = -side; a.dir = [-side, 0];
+          f.m.fx.burst(f.cx, f.cy, 14, 300, 0.4, 3, '#fff7c2', 0, 0); f.m.fx.ring(f.cx, f.cy, 50, 0.3, '#fff', 4); SFX.play('sup_tp');
+        }
+        if (a.did === 1 && !a.did2 && a.t >= 0.24 && foe) { a.did2 = 1; supHurt(f, foe, 20, f.facing * 760, -260); f.m.fx.ring(foe.cx, foe.cy, 60, 0.25, '#fbbf24', 5); }
+        if (a.did2 === 1 && a.t >= 0.36 && foe && Math.hypot(foe.cx - f.cx, foe.cy - f.cy) < 150) { a.did2 = 2; supHurt(f, foe, 14, f.facing * 400, -900); f.m.fx.burst(foe.cx, foe.cy, 10, 400, 0.3, 3, '#fbbf24', 300, 0); }
+      }},
+    {cd: 22, T: 1.7, lock: 0.15, arms: null, start(f, a) { a.dir = supDir(f); SFX.play('sup_charge'); },
+      tick(f, a) {
+        a.arm = 'up';
+        if (Math.random() < 0.7) { const P = f.pts[HEAD]; f.m.fx.add(P.x + rnd(-50, 50), P.y - 60 + rnd(-30, 30), 0, 0, 0.3, 3, '#fff7c2', 0, 0); }
+        if (!a.fired && a.t >= 1.25) {
+          a.fired = 1; const P = f.pts[HEAD], foe = supNear(f);
+          let d = a.dir; if (foe) { const dx = foe.cx - P.x, dy = foe.cy - (P.y - 40), l = Math.hypot(dx, dy) || 1; d = [dx / l, dy / l]; }
+          supP(f.m, 'kiorb', P.x, P.y - 55, d[0] * 380, d[1] * 380, 4, {owner: f, dmg: 80, knock: 1100, r: 44, R: 280});
+          SFX.play('sup_beam'); f.m.fx.addShake(8);
+        }
+      }}
+  ],
+  steel: [
+    {cd: 1.1, T: 0.38, lock: 0.2, fly: 1, arms: 'punch',
+      start(f, a) { a.dir = supDir(f); f.facing = a.dir[0] >= 0 ? 1 : -1; SFX.play('dash'); a.dash = 1; },
+      tick(f, a) {
+        if (a.t > 0.04 && a.t < 0.26) {
+          supFly(f, a.dir[0] * 1050, a.dir[1] * 1050);
+          f.m.fx.add(f.x - a.dir[0] * 20, f.cy, 0, 0, 0.3, 4, '#bfdbfe', 0, 1);
+          for (const e of supFoes(f)) if (a.hit.indexOf(e) < 0 && Math.abs(e.cx - (f.cx + a.dir[0] * 40)) < 70 && Math.abs(e.cy - (f.cy + a.dir[1] * 40)) < 85 && e.invuln <= 0) {
+            a.hit.push(e); supHurt(f, e, 22, a.dir[0] * 950, a.dir[1] * 600 - 250);
+            f.m.fx.ring(e.cx, e.cy, 70, 0.3, '#fff', 6); f.m.fx.addShake(8); f.m.hitstop = Math.max(f.m.hitstop, 0.05); f.vx *= 0.2; f.vy *= 0.2;
+          }
+        } else if (a.t >= 0.26) { f.vx *= 0.8; f.vy *= 0.8; }
+      }},
+    {cd: 6, T: 1.4, lock: 0.35, arms: 'fwd', start(f, a) { a.fired = 0; SFX.play('sup_charge'); },
+      tick(f, a) {
+        if (!a.fired && a.t >= 0.22) {
+          a.fired = 1; const d = supDir(f), P = f.pts[HEAD];
+          supP(f.m, 'beam_heat', P.x + f.facing * 8, P.y + 2, d[0], d[1], 1.0, {owner: f, dmg: 5, knock: 160, len: 1100, w: 14, tick: 0, track: 1});
+          SFX.play('sup_beam');
+        }
+      }},
+    {cd: 7, T: 1.1, lock: 0.45, arms: 'fwd', start(f, a) { a.tk = 0; SFX.play('sup_ice'); },
+      tick(f, a, dt) {
+        const d = supDir(f), P = f.pts[HEAD];
+        if (a.t < 0.95) {
+          for (let i = 0; i < 3; i++) { const s = (Math.random() - 0.5) * 0.5, c = Math.cos(s), sn = Math.sin(s), dx = d[0] * c - d[1] * sn, dy = d[0] * sn + d[1] * c, sp = rnd(380, 620); f.m.fx.add(P.x + dx * 20, P.y + dy * 20, dx * sp, dy * sp, 0.45, rnd(3, 6), Math.random() < 0.5 ? '#bae6fd' : '#ffffff', 0, 1); }
+          a.tk -= dt;
+          if (a.tk <= 0) {
+            a.tk = 0.1;
+            for (const e of supFoes(f)) {
+              const rx = e.cx - P.x, ry = e.cy - P.y, along = rx * d[0] + ry * d[1], perp = Math.abs(-rx * d[1] + ry * d[0]);
+              if (along > 0 && along < 340 && perp < 40 + along * 0.32 && e.invuln <= 0) { supHurt(f, e, 3, d[0] * 120, -40); e.hitstun = Math.max(e.hitstun, 0.45); e.vx *= 0.4; e.iceT = 0.5; }
+            }
+          }
+        }
+      }},
+    {cd: 18, T: 2.6, lock: 0, fly: 1, arms: 'fly',
+      start(f, a) { a.ph = 0; a.dir = [0, -1]; SFX.play('sup_charge'); },
+      tick(f, a, dt) {
+        const foe = supNear(f);
+        if (a.ph === 0) { supFly(f, 0, -1250); if (a.t > 0.42 || f.y < 120) { a.ph = 1; a.t1 = a.t; } }
+        else if (a.ph === 1) {
+          f.vy *= 0.8; if (foe) f.vx += (foe.cx - f.cx) * 8 * dt * 10; f.vx = clamp(f.vx, -700, 700);
+          if (a.t - a.t1 > 0.45) { a.ph = 2; SFX.play('sup_beam'); }
+        } else if (a.ph === 2) {
+          f.vx *= 0.9; f.vy = 1700; f.m.fx.add(f.x, f.y - 60, 0, -200, 0.3, 6, '#93c5fd', 0, 1);
+          if (f.grounded || a.t > 2.4) {
+            a.ph = 3; a.t = Math.max(a.t, 2.2);
+            supBoom(f.m, f, f.x, f.y - 10, 330, 60, 1200, '#93c5fd'); f.m.addShock(f.x, f.y, 10, 520, 0.7, '#ffffff', 6);
+          }
+        }
+      }}
+  ],
+  titan: [
+    {cd: 0.75, T: 0.42, lock: 0.5, arms: 'fwd', start(f, a) { a.fired = 0; },
+      tick(f, a) {
+        const times = [0.06, 0.24];
+        while (a.fired < 2 && a.t >= times[a.fired]) {
+          const d = supDir(f), P = f.pts[CHEST], cols = ['#a855f7', '#f97316'];
+          supP(f.m, 'gem_p', P.x + d[0] * 34, P.y + d[1] * 34, d[0] * 760, d[1] * 760, 1.5, {owner: f, dmg: 16, knock: 650, r: 15, col: cols[a.fired], rot: a.fired});
+          SFX.play('sup_gem'); a.fired++;
+        }
+      }},
+    {cd: 9, T: 1.7, lock: 0.3, arms: 'spread', start(f, a) { SFX.play('sup_charge'); },
+      tick(f, a, dt) {
+        if (a.t < 1.25) {
+          for (const e of supFoes(f)) {
+            const dx = f.cx - e.cx, dy = f.cy - e.cy, d = Math.hypot(dx, dy); if (d > 700 || d < 60) continue;
+            if (e.ragdoll) e.addImpulse(dx / d * 900 * dt * 2.2, dy / d * 300 * dt, undefined);
+            else { e.x += dx / d * 440 * dt; e.vx = dx / d * 440; if (!e.grounded) e.y += dy / d * 200 * dt; }
+          }
+          if (Math.random() < 0.8) { const ang = Math.random() * 6.283, r = rnd(180, 380); f.m.fx.add(f.cx + Math.cos(ang) * r, f.cy + Math.sin(ang) * r, -Math.cos(ang) * 420, -Math.sin(ang) * 420, 0.45, 4, '#c4b5fd', 0, 1); }
+        } else if (!a.fired) {
+          a.fired = 1; supBoom(f.m, f, f.cx, f.cy, 260, 28, 900, '#a855f7');
+        }
+      }},
+    {cd: 11, T: 0.55, lock: 0.5, arms: 'up',
+      start(f, a) {
+        SFX.play('sup_time'); f.sup.haste = 3.0; f.m.fx.flash = 0.1; f.m.fx.ring(f.cx, f.cy, 380, 0.7, '#fde047', 6); f.m.addShock(f.cx, f.cy, 10, 700, 0.6, '#fde047', 6);
+        for (const e of supFoes(f)) if (Math.hypot(e.cx - f.cx, e.cy - f.cy) < 760) { e.hitstun = Math.max(e.hitstun, 1.7); e.vx = 0; e.timeT = 1.7; e.atkT = -1; e.dashT = 0; f.m.fx.ring(e.cx, e.cy, 60, 0.6, '#fde047', 4); }
+      }},
+    {cd: 40, T: 2.4, lock: 0, arms: 'spread', start(f, a) { SFX.play('sup_charge'); },
+      tick(f, a) {
+        f.m.cine.tDim = 0.55;
+        if (Math.random() < 0.6) f.m.fx.add(f.cx + rnd(-30, 30), f.cy + rnd(-60, 60), rnd(-50, 50), rnd(-120, -20), 0.6, 3, ['#a855f7', '#fde047', '#ef4444', '#60a5fa', '#4ade80'][(Math.random() * 5) | 0], 0, 1);
+        if (!a.fired && a.t >= 1.6) {
+          a.fired = 1; f.m.fx.flash = 0.35; f.m.fx.addShake(14); SFX.play('sup_snap'); f.m.addShock(f.cx, f.cy, 10, 900, 0.8, '#fde047', 10); f.m.addShock(f.cx, f.cy, 10, 700, 0.6, '#a855f7', 8);
+          for (const e of supFoes(f)) {
+            if (e.invuln > 0) continue; const dmg = Math.max(1, Math.floor(e.hp * 0.5));
+            supHurt(f, e, dmg, (e.cx < f.cx ? -1 : 1) * 500, -500); f.m.fx.burst(e.cx, e.cy, 30, 300, 1.2, 4, '#9ca3af', 40, 1);
+          }
+        }
+      }}
+  ],
+  thunder: [
+    {cd: 0.85, T: 0.5, lock: 0.45, arms: 'punch', start(f, a) { a.dir = supDir(f); a.fired = 0; },
+      tick(f, a) {
+        if (!a.fired && a.t >= 0.14) {
+          a.fired = 1; const d = a.dir, P = f.pts[CHEST];
+          supP(f.m, 'hammer', P.x + d[0] * 36, P.y + d[1] * 36, d[0] * 980, d[1] * 980, 0.75, {owner: f, dmg: 19, knock: 700, r: 16});
+          SFX.play('sup_hammer');
+        }
+      }},
+    {cd: 8, T: 1.4, lock: 0.4, arms: 'up',
+      start(f, a) {
+        SFX.play('sup_thunder');
+        const foes = supFoes(f); const xs = foes.map(e => e.cx); xs.push(clamp(f.cx + f.facing * 180, 60, 1220));
+        xs.forEach((x, i) => supP(f.m, 'strike', x, (foes[i] ? foes[i].y : f.y) + 4, 0, 0, 1.0, {owner: f, dmg: 26, knock: 600, rot: 0.7, fired: 0, noFriendly: i === foes.length}));
+      }},
+    {cd: 3, T: 0.5, lock: 0.2, fly: 1, arms: 'punch',
+      start(f, a) { a.dir = supDir(f); f.facing = a.dir[0] >= 0 ? 1 : -1; SFX.play('sup_thunder'); },
+      tick(f, a) {
+        if (a.t > 0.04 && a.t < 0.32) {
+          supFly(f, a.dir[0] * 1250, a.dir[1] * 1250);
+          f.m.fx.add(f.x + rnd(-14, 14), f.cy + rnd(-30, 30), 0, 0, 0.2, 4, '#fde047', 0, 0);
+          for (const e of supFoes(f)) if (a.hit.indexOf(e) < 0 && Math.abs(e.cx - f.cx) < 80 && Math.abs(e.cy - f.cy) < 90 && e.invuln <= 0) {
+            a.hit.push(e); supHurt(f, e, 18, a.dir[0] * 800, -350); e.hitstun = Math.max(e.hitstun, 0.5);
+            f.m.fx.burst(e.cx, e.cy, 12, 500, 0.3, 3, '#fde047', 0, 0); f.m.fx.addShake(6);
+          }
+        } else if (a.t >= 0.32) { f.vx *= 0.8; f.vy *= 0.8; }
+      }},
+    {cd: 20, T: 3.4, lock: 0.5, arms: 'up', start(f, a) { a.n = 0; a.nx = 0; SFX.play('sup_thunder'); f.m.fx.flash = 0.15; },
+      tick(f, a, dt) {
+        f.m.cine.tDim = 0.35;
+        a.nx -= dt;
+        if (a.t < 2.7 && a.nx <= 0) {
+          a.nx = 0.2; const foes = supFoes(f), tg = foes.length && Math.random() < 0.55 ? foes[(Math.random() * foes.length) | 0] : null;
+          supP(f.m, 'strike', tg ? tg.cx + rnd(-30, 30) : rnd(80, 1200), tg ? tg.y + 4 : 640, 0, 0, 0.9, {owner: f, dmg: 22, knock: 560, rot: 0.55, fired: 0});
+        }
+      }}
+  ]
+};
+
+// ---------- projéteis da super arma ----------
+function supProjStep(m, p, dt) {
+  const o = p.owner, k = p.kind;
+  p.life -= dt;
+  if (k === 'beam_ki' || k === 'beam_heat') {
+    if (!o || !o.alive || !o.sup || p.life <= 0) return true;
+    const ch = o.pts[k === 'beam_heat' ? HEAD : CHEST];
+    if (p.track) { const d = supDir(o); p.vx = d[0]; p.vy = d[1]; }
+    const dx = p.vx, dy = p.vy;
+    p.x = ch.x + dx * (k === 'beam_heat' ? 14 : 26); p.y = ch.y + dy * (k === 'beam_heat' ? 14 : 26) + (k === 'beam_heat' ? 2 : 0);
+    let tW = 1; const ex = p.x + dx * p.len, ey = p.y + dy * p.len;
+    for (const pl of m.plats) { if (!pl.solid) continue; const t = segRect(p.x, p.y, ex, ey, pl.x, pl.y, pl.w, pl.h); if (t >= 0 && t < tW) tW = t; }
+    p.rot = p.len * tW; const bx = p.x + dx * p.rot, by = p.y + dy * p.rot;
+    if (Math.random() < 0.8) m.fx.add(bx + rnd(-10, 10), by + rnd(-10, 10), rnd(-200, 200), rnd(-200, 200), 0.3, rnd(3, 6), k === 'beam_ki' ? '#a5f3fc' : '#fca5a5', 0, 1);
+    p.tick -= dt;
+    if (p.tick <= 0) {
+      p.tick = 0.1;
+      const hw = k === 'beam_ki' ? p.w : 34, offs = [-hw / 2, 0, hw / 2];
+      for (const f of supFoes(o)) {
+        if (f.invuln > 0) continue;
+        for (const of of offs) {
+          const ox = p.x - dy * of, oy = p.y + dx * of, h = f.hitBySeg(ox, oy, ox + dx * p.rot, oy + dy * p.rot);
+          if (h) { f.hurt(p.dmg, dx * p.knock, dy * p.knock * 0.5 - 60, o, 'sup', h.x, h.y); if (k === 'beam_ki') f.hitstun = Math.max(f.hitstun, 0.1); break; }
+        }
+      }
+    }
+    return false;
+  }
+  if (k === 'strike') {
+    if (!p.fired) {
+      p.rot -= dt;
+      if (p.rot <= 0) {
+        p.fired = 1; p.life = 0.3; p.rot = 0;
+        m.fx.burst(p.x, p.y, 16, 500, 0.4, 3, '#fde047', 300, 0); m.fx.ring(p.x, p.y, 90, 0.35, '#fde047', 6); m.fx.addShake(7); SFX.play('sup_zap');
+        for (const f of m.fighters) {
+          if (f === o || !f.alive || f.invuln > 0) continue;
+          if (Math.abs(f.cx - p.x) < 52 && f.cy < p.y + 70) { f.hurt(p.dmg, (f.cx < p.x ? -1 : 1) * 260, -p.knock, o, 'sup', f.cx, f.cy); }
+        }
+      }
+    } else p.rot -= dt;
+    return p.life <= 0;
+  }
+  // projéteis em linha: kiball, gem_p, hammer, kiorb
+  const ox = p.x, oy = p.y; p.x += p.vx * dt; p.y += p.vy * dt;
+  if (k === 'hammer') p.rot += dt * 24;
+  if (k === 'kiorb') m.fx.add(p.x, p.y, rnd(-60, 60), rnd(-60, 60), 0.35, rnd(5, 9), '#fde68a', 0, 1);
+  else if (k === 'kiball') m.fx.add(p.x, p.y, 0, 0, 0.15, 5, '#fff7c2', 0, 0);
+  else if (k === 'gem_p') m.fx.add(p.x, p.y, rnd(-30, 30), rnd(-30, 30), 0.3, 4, p.col, 0, 1);
+  else if (k === 'hammer') m.fx.add(p.x, p.y, rnd(-30, 30), rnd(-30, 30), 0.2, 3, '#fde047', 0, 0);
+  let hitW = false, tW = 2;
+  for (const pl of m.plats) { if (!pl.solid) continue; const t = segRect(ox, oy, p.x, p.y, pl.x, pl.y, pl.w, pl.h); if (t >= 0 && t < tW) tW = t; }
+  if (tW <= 1) { hitW = true; p.x = ox + (p.x - ox) * tW; p.y = oy + (p.y - oy) * tW; }
+  let dead = p.life <= 0 || hitW;
+  for (const f of m.fighters) {
+    if (!f.alive || f.invuln > 0 || f === o || p.hit.indexOf(f) >= 0) continue;
+    const h = f.hitByCircle(ox, oy, p.x, p.y, p.r);
+    if (!h) continue;
+    if (k === 'kiorb') { dead = true; break; }
+    const sp = Math.hypot(p.vx, p.vy) || 1;
+    f.hurt(p.dmg, p.vx / sp * p.knock, p.vy / sp * p.knock * 0.5 - 90, o, 'sup', h.x, h.y);
+    m.fx.burst(h.x, h.y, 10, 420, 0.35, 4, k === 'gem_p' ? p.col : '#fde68a', 200, 0);
+    if (k === 'hammer') p.hit.push(f); else { dead = true; break; }
+  }
+  if (p.y > m.arena.killY + 80 || p.x < -300 || p.x > WORLD_W + 300 || p.y < -800) dead = true;
+  if (dead) {
+    if (k === 'kiorb') supBoom(m, o, p.x, p.y, p.R, p.dmg, p.knock, '#fde68a');
+    else if (hitW || k === 'kiball') m.fx.burst(p.x, p.y, 7, 300, 0.3, 3, k === 'gem_p' ? p.col : '#fff7c2', 200, 0);
+  }
+  return dead;
+}
+
+// ---------- ciclo do boss (lutador) ----------
+function endSuper(f) {
+  if (!f.sup) return;
+  f.sup = null; f.maxhp = f.baseMax || 100; f.hp = Math.min(f.hp, f.maxhp); f.h = BH; f.w = BW;
+}
+Fighter.prototype.becomeSuper = function (type) {
+  const m = this.m, D = SUPERS[type]; if (!D) return;
+  this.dropWeapon(false); this.awk = null; this.ragdoll = false; this.stun = 0; this.hitstun = 0; this.atkT = -1; this.dashT = 0; this.charge = 0; this.beamT = 0; this.getUpT = 0;
+  this.baseMax = this.maxhp; this.maxhp = Math.round(D.hp + (this.maxhp - 100) * 1.5); this.hp = this.maxhp;
+  this.sup = {type, cd: [0, 0, 0, 12], act: null, t: 0, haste: 0, sc: D.sc, dir: [1, 0]};
+  this.h = BH * D.sc; this.w = BW * 1.2; this.invuln = Math.max(this.invuln, 1.2);
+  m.fx.ring(this.cx, this.cy, 260, 0.8, D.c, 8); m.fx.ring(this.cx, this.cy, 160, 0.6, '#fff', 5); m.fx.burst(this.cx, this.cy, 40, 700, 0.9, 5, D.c, 0, 0);
+  m.fx.addShake(12); m.fx.flash = 0.2; m.addShock(this.cx, this.cy, 10, 640, 0.7, D.c, 9);
+  SFX.play('sup_pick');
+  m.showBanner(this.name + ' VIROU ' + D.name + '!', D.c);
+};
+Fighter.prototype.updateSuper = function (dt) {
+  const m = this.m, I = this.input, S = this.sup, D = SUPERS[S.type], MV = SUP_MOVES[S.type];
+  S.t += dt; S.haste = Math.max(0, S.haste - dt);
+  const reg = S.haste > 0 ? 2 : 1; for (let i = 0; i < 4; i++) S.cd[i] = Math.max(0, S.cd[i] - dt * reg);
+  const fz = m.frozen || m.state !== 'play' || m.ended;
+  let a = S.act;
+  if (!a && !fz) {
+    let k = -1;
+    if (I.awkP && S.cd[3] <= 0) k = 3; else if (I.dropP && S.cd[2] <= 0) k = 2; else if (I.spP && S.cd[1] <= 0) k = 1; else if (I.atkH && S.cd[0] <= 0) k = 0;
+    if (k >= 0 && (!MV[k].can || MV[k].can(this))) { a = S.act = {k, t: 0, hit: [], mv: MV[k], fired: 0}; S.cd[k] = MV[k].cd; if (a.mv.start) a.mv.start(this, a); }
+  }
+  const mv = a ? a.mv : null, lock = fz ? 0 : (mv ? mv.lock : 1);
+  const hasteK = S.haste > 0 ? 1.5 : 1;
+  // movimento / voo
+  const up = I.jumpH || I.my < -0.55, down = I.my > 0.5;
+  const tx = I.mx * D.spd * lock * hasteK, ty = ((up ? -1 : down ? 1 : 0) * (up ? 480 : 400)) * lock * hasteK;
+  if (!(a && mv.fly)) { this.vx += (tx - this.vx) * Math.min(1, dt * 7); this.vy += (ty - this.vy) * Math.min(1, dt * 6); }
+  const dropT = down;
+  // direção do rosto
+  if (a && a.dir && Math.abs(a.dir[0]) > 0.2) this.facing = a.dir[0] > 0 ? 1 : -1;
+  else if (!fz) { if (I.face) this.facing = I.face; else if (Math.abs(I.aimX) > 0.2) this.facing = I.aimX > 0 ? 1 : -1; else if (Math.abs(I.mx) > 0.25) this.facing = I.mx > 0 ? 1 : -1; }
+  if (a) {
+    a.t += dt;
+    if (mv.tick) mv.tick(this, a, dt);
+    if (a.t >= mv.T) S.act = null;
+  }
+  moveBody(m, this, dt, dropT);
+  if (this.y - this.h < 30) { this.y = 30 + this.h; if (this.vy < 0) this.vy = 0; }
+  this.x = clamp(this.x, 30, WORLD_W - 30);
+  this.phase += this.grounded ? Math.abs(this.vx) * dt * 0.034 : dt * 4;
+  // pose
+  this.aimOn = false; this.aimA = 0;
+  this.pose();
+  const T = this.T, ch0 = T[CHEST], fly = !this.grounded && Math.abs(this.vx) > 160;
+  if (fly) { ch0.x += this.facing * 8; T[HEAD].x += this.facing * 10; }
+  const d = a && a.dir ? a.dir : supDir(this);
+  let arm = a ? (a.arm !== undefined ? a.arm : mv.arms) : null;
+  if (!a && !this.grounded && Math.abs(this.vy) > 200 && Math.abs(this.vx) > 160) arm = 'fly';
+  if (arm) supArms(this, arm, d[0], d[1]);
+  const s = S.sc, cx = this.x, cy = this.y;
+  for (let i = 0; i < 11; i++) { T[i].x = cx + (T[i].x - cx) * s; T[i].y = cy + (T[i].y - cy) * s; }
+  this.smoothPose(1); this.capeStep(dt);
+  // rastro de voo
+  if (!this.grounded && Math.random() < 0.5) m.fx.add(this.x + rnd(-10, 10), this.y - 10, -this.vx * 0.1, 30, 0.35, rnd(3, 5), D.c, 0, 1);
+  this.checkBounds();
+  I.jumpP = I.spP = I.dropP = I.awkP = false;
+};
+
+// ---------- partida: item, sorteio, bots ----------
+Match.prototype.showBanner = function (s, c) { this.banner = {s, c, t: SUP_BANNER_T}; };
+Match.prototype.supInit = function () {
+  const c = this.cfg, okMode = c.mode === 'duel_cpu' || c.mode === 'duel_local' || c.mode === 'chaos' || c.mode === 'online';
+  this.supOn = okMode && c.supers !== false && !this.arena.training && !this.env.netClient;
+  this.supAt = rnd(13, 26); this.supDone = false; this.supItem = null; this.banner = null;
+};
+Match.prototype.supUpdate = function (dt) {
+  if (this.banner) { this.banner.t -= dt; if (this.banner.t <= 0) this.banner = null; }
+  if (!this.supOn || this.env.netClient) return;
+  // sorteio e queda do item
+  if (!this.supDone && this.state === 'play' && !this.ended && this.t >= this.supAt) {
+    this.supDone = true;
+    const type = SUPER_IDS[(Math.random() * SUPER_IDS.length) | 0], sp = this.arena.spawns, s = sp[(Math.random() * sp.length) | 0];
+    this.supItem = {type, x: clamp(s.x + rnd(-60, 60), 80, WORLD_W - 80), y: -80, vx: 0, vy: 0, w: 36, h: 36, t: 0, bounce: 0};
+    SFX.play('sup_drop'); this.fx.addShake(6);
+    this.showBanner('SUPER ARMA CAINDO DO CÉU!', SUPERS[type].c);
+  }
+  const it = this.supItem;
+  if (!it) return;
+  it.t += dt; it.vy = Math.min(900, it.vy + GRAV * 0.5 * dt);
+  moveBody(this, it, dt, false);
+  if (it.y > this.arena.killY - 40) { it.y = -60; it.vy = 0; }
+  if (it.grounded) it.vx = 0;
+  if (Math.random() < 0.5) this.fx.add(it.x + rnd(-16, 16), it.y - 20 + rnd(-20, 20), 0, -60, 0.5, 3, SUPERS[it.type].c, 0, 1);
+  for (const f of this.fighters) {
+    if (!f.alive || f.ragdoll || f.out || f.sup || f.awk) continue;
+    if (Math.abs(f.x - it.x) < 48 && f.cy > it.y - 90 && f.cy < it.y + 90) { this.supItem = null; f.becomeSuper(it.type); break; }
+  }
+};
+// bots: buscam o item; bots-boss usam os 4 golpes
+Match.prototype.supBrain = function (dt) {
+  const it = this.supItem;
+  for (const f of this.fighters) {
+    if (!f.brain || !f.alive || f.out || f.ragdoll || this.frozen) continue;
+    const I = f.input;
+    if (f.sup) { supBot(f, dt); continue; }
+    if (it && !f.awk) {
+      const g = f.brain._sg === undefined ? (f.brain._sg = Math.random() < 0.75) : f.brain._sg;
+      if (!g) continue;
+      const dx = it.x - f.x; I.mx = Math.abs(dx) < 14 ? 0 : sgn(dx);
+      if (it.y < f.y - 110 && f.grounded && Math.abs(dx) < 260) I.jumpP = true;
+      if (it.y < f.y - 110 && !f.grounded && f.airJumps > 0 && f.vy > -120) I.jumpP = true;
+      if (it.y > f.y + 30 && f.plat && !f.plat.solid && Math.abs(dx) < 120) I.my = 1;
+    }
+  }
+};
+function supBot(f, dt) {
+  const S = f.sup, I = f.input, foe = supNear(f), T = S.type;
+  if (!f.brain.sb) f.brain.sb = {w: 0};
+  const B = f.brain.sb; B.w -= dt;
+  I.atkH = false; I.jumpH = false; I.mx = 0; I.my = 0; I.aimX = 0; I.aimY = 0;
+  if (!foe) return;
+  const dx = foe.cx - f.cx, dy = foe.cy - f.cy, dist = Math.hypot(dx, dy), l = dist || 1;
+  const melee = T === 'steel' || T === 'thunder' ? 1 : 0, want = melee ? 90 : (T === 'titan' ? 220 : 360);
+  I.mx = Math.abs(dx) > want + 40 ? sgn(dx) : (Math.abs(dx) < want - 70 && !melee ? -sgn(dx) : 0);
+  const ty = melee ? foe.cy : foe.cy - 10;
+  I.my = clamp((ty - f.cy) / 70, -1, 1); if (I.my < -0.3) I.jumpH = true;
+  if (f.y > 640 && I.my > 0) I.my = 0;
+  I.aimX = dx / l; I.aimY = dy / l; if (Math.abs(I.aimX) < 0.2) I.aimX = 0.2 * sgn(dx || f.facing);
+  if (S.act || B.w > 0) return;
+  const aligned = Math.abs(dy) < 90, r = Math.random();
+  B.w = rnd(0.12, 0.4);
+  const c = S.cd;
+  if (c[3] <= 0 && (T !== 'titan' || dist < 500) && (T !== 'steel' || dist > 220)) { I.awkP = true; B.w = 0.6; return; }
+  if (T === 'ki') { if (c[1] <= 0 && aligned && dist > 260 && r < 0.6) I.spP = true; else if (c[2] <= 0 && dist < 520 && r < 0.4) I.dropP = true; else if (c[0] <= 0 && dist < 800) I.atkH = true; }
+  else if (T === 'steel') { if (c[1] <= 0 && dist > 200 && aligned && r < 0.5) I.spP = true; else if (c[2] <= 0 && dist < 300 && aligned && r < 0.5) I.dropP = true; else if (c[0] <= 0 && dist < 400 && r < 0.8) I.atkH = true; }
+  else if (T === 'titan') { if (c[2] <= 0 && dist < 600 && r < 0.4) I.dropP = true; else if (c[1] <= 0 && dist < 600 && dist > 120 && r < 0.4) I.spP = true; else if (c[0] <= 0 && dist < 800) I.atkH = true; }
+  else { if (c[1] <= 0 && r < 0.4) I.spP = true; else if (c[2] <= 0 && dist < 420 && aligned && r < 0.5) I.dropP = true; else if (c[0] <= 0 && dist < 700 && aligned) I.atkH = true; }
+}
+Match.prototype.supProjsStep = function (dt) {
+  const P = this.projs;
+  for (let i = P.length - 1; i >= 0; i--) { const p = P[i]; if (p.sup && supProjStep(this, p, dt)) P.splice(i, 1); }
+};
+// cliente online: só relógio do banner
+Match.prototype.supClient = function (dt) { if (this.banner) { this.banner.t -= dt; if (this.banner.t <= 0) this.banner = null; } if (this.supItem) { this.supItem.t = (this.supItem.t || 0) + dt; this.supItem.vy = this.supItem.vy || 0; } };
+
+'use strict';
 /* STICK MAYHEM — IA dos bots: máquina de estados com personalidades e dificuldades */
 const DIFF = [
   {react: 0.38, aim: 0.22, atk: 0.45, dodge: 0.0, sp: 0.0, edge: 0.55, name: 'Fácil'},
@@ -4133,6 +4661,7 @@ function drawFighter(ctx, f, t, tag) {
   if (sk.acc === 'backpack') { ctx.save(); ctx.translate((P[CHEST].x + P[HIP].x) / 2 - fx * 8, (P[CHEST].y + P[HIP].y) / 2 - 2); ctx.rotate(Math.atan2(P[CHEST].x - P[HIP].x, P[HIP].y - P[CHEST].y) * 1); ctx.fillStyle = shade(acc, -0.2); ctx.strokeStyle = OUT; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.rect(-6, -13, 12, 24); ctx.fill(); ctx.stroke(); ctx.restore(); }
   const limb = (a, b, c, w, col) => {
     if (st === 'tung' && w < 11) w *= 0.62;
+    if (f.sup) w *= f.sup.sc;
     ctx.lineCap = st === 'block' ? 'butt' : 'round'; ctx.lineJoin = st === 'block' ? 'miter' : 'round';
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); if (c) ctx.lineTo(c.x, c.y);
     ctx.strokeStyle = OUT; ctx.lineWidth = w + 4; ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = w; ctx.stroke();
@@ -4238,6 +4767,7 @@ function drawItems(ctx, m, t) {
 }
 function drawProjs(ctx, m, t) {
   for (const p of m.projs) {
+    if (drawSupProj(ctx, p, t)) continue;
     const a = Math.atan2(p.vy, p.vx);
     ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(a);
     switch (p.kind) {
@@ -4283,18 +4813,23 @@ function drawScene(ctx, m, t, bg) {
   ctx.drawImage(bg, 0, 0, WORLD_W, WORLD_H);
   const d = decorDyn[m.arena.id]; if (d) d(ctx, t, m);
   drawPlatforms(ctx, m, t);
+  { const o = decorOver[m.arena.id]; if (o) o(ctx, t, m); }
   drawItems(ctx, m, t);
+  drawSupItem(ctx, m, t);
   const showTag = m.cfg.mode !== 'menu' && m.cfg.mode !== 'preview' && m.cfg.mode !== 'awkprev' && m.cfg.mode !== 'fatality';
   for (const f of m.fighters) if (!f.alive) drawFighter(ctx, f, t, false);
   drawCineUnder(ctx, m);
   if (m.fatMode) drawFatUnder(ctx, m, t);
   for (const f of m.fighters) if (f.alive) drawAwkBack(ctx, f, t);
+  for (const f of m.fighters) if (f.alive && f.sup) drawSuperBack(ctx, f, t);
   for (const f of m.fighters) if (f.alive) {
     if (f.hidden) continue;
     if (f.fScale !== undefined && f.fScale < 0.999) { const fc = f.pts[CHEST]; ctx.save(); ctx.translate(fc.x, fc.y); ctx.scale(f.fScale, f.fScale); ctx.translate(-fc.x, -fc.y); drawFighter(ctx, f, t, showTag); ctx.restore(); }
     else drawFighter(ctx, f, t, showTag);
+    if (f.sup) drawSuperFront(ctx, f, t);
   }
   for (const f of m.fighters) if (f.alive && f.awk) drawAwkFront(ctx, f, t);
+  { const o = decorFront[m.arena.id]; if (o) o(ctx, t, m); }
   drawProjs(ctx, m, t);
   for (const f of m.fighters) if (f.alive && f.aimOn && f.human) {
     const P = f.pts[CHEST], dx = f.facing * Math.cos(f.aimA), dy = Math.sin(f.aimA), x = P.x + dx * 95, y = P.y + dy * 95;
@@ -4303,6 +4838,7 @@ function drawScene(ctx, m, t, bg) {
     ctx.beginPath(); ctx.arc(P.x + dx * 55, P.y + dy * 55, 2.5, 0, 6.283); ctx.arc(P.x + dx * 75, P.y + dy * 75, 2.5, 0, 6.283); ctx.fill(); ctx.globalAlpha = 1;
   }
   drawFX(ctx, m);
+  drawSuperOver(ctx, m, t);
   if (m.fatMode) drawFatOver(ctx, m, t);
   if (m.fx.flash > 0) { ctx.fillStyle = 'rgba(255,255,255,0.18)'; ctx.fillRect(0, 0, WORLD_W, WORLD_H); }
 }
@@ -4432,6 +4968,7 @@ function drawArenaPreview(cv, arena) {
   const th = arena.theme;
   for (const p of arena.plats) { c.fillStyle = p.ice ? '#bfe9fb' : th.plat; c.fillRect(p.x, p.y, p.w, p.h); c.fillStyle = p.ice ? '#fff' : th.top; c.fillRect(p.x, p.y, p.w, 6); c.strokeStyle = OUT; c.lineWidth = 3; c.strokeRect(p.x, p.y, p.w, p.h); }
   if (arena.lavaY) { c.fillStyle = '#ff6a1a'; c.fillRect(0, arena.lavaY, WORLD_W, 40); }
+  { const o = decorOver[arena.id]; if (o) try { o(c, 0, {plats: arena.plats, arena}); } catch (e) {} }
   c.restore();
 }
 
@@ -4624,6 +5161,384 @@ function cosDrawCele(ctx, f, t0) {
       ctx.font = 'bold 22px sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = OUT; ctx.fillStyle = '#fde047'; ctx.strokeText('M', P[HEAD].x, P[HEAD].y - 36 - Math.abs(Math.sin(t * 7)) * 6); ctx.fillText('M', P[HEAD].x, P[HEAD].y - 36 - Math.abs(Math.sin(t * 7)) * 6); break;
   }
 }
+
+'use strict';
+/* STICK MAYHEM v1.7 — desenho das super armas (item, aura do boss, golpes, HUD) */
+function supGlow(ctx, x, y, r, c, a) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, c); g.addColorStop(1, c + '00');
+  ctx.globalAlpha = a === undefined ? 1 : a; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill(); ctx.globalAlpha = 1;
+}
+function supOrb(ctx, x, y, r, c, t) {
+  supGlow(ctx, x, y, r * 2.2, c, 0.55); ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, r * (1 + 0.06 * Math.sin(t * 30)), 0, 6.283); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, r * 0.55, 0, 6.283); ctx.fill();
+}
+function supHex(c) { return /^#[0-9a-f]{6}$/i.test(c) ? c : '#ffffff'; }
+
+function drawSupItem(ctx, m, t) {
+  const it = m.supItem; if (!it) return;
+  const D = SUPERS[it.type], pul = 0.5 + 0.5 * Math.sin(t * 6), by = it.y - 26 + Math.sin(t * 3) * 4;
+  // coluna de luz vinda do céu
+  const g = ctx.createLinearGradient(0, 0, 0, it.y); g.addColorStop(0, D.c + '00'); g.addColorStop(1, D.c + '66');
+  ctx.fillStyle = g; ctx.fillRect(it.x - 26 - pul * 6, 0, 52 + pul * 12, it.y);
+  ctx.fillStyle = D.c2 + '88'; ctx.fillRect(it.x - 6, 0, 12, it.y);
+  supGlow(ctx, it.x, by, 90 + pul * 20, D.c, 0.7);
+  ctx.save(); ctx.translate(it.x, by); ctx.rotate(Math.sin(t * 2) * 0.2);
+  ctx.fillStyle = '#0b1020'; ctx.strokeStyle = D.c2; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(0, -30); ctx.lineTo(26, 0); ctx.lineTo(0, 30); ctx.lineTo(-26, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = D.c; ctx.beginPath(); ctx.moveTo(0, -19); ctx.lineTo(16, 0); ctx.lineTo(0, 19); ctx.lineTo(-16, 0); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(D.ico, 0, 4);
+  ctx.restore();
+  ctx.font = 'bold 15px sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = '#000'; ctx.fillStyle = '#fff';
+  ctx.strokeText('SUPER ARMA', it.x, by - 44); ctx.fillText('SUPER ARMA', it.x, by - 44);
+  ctx.fillStyle = D.c; ctx.strokeText(D.name, it.x, by - 60); ctx.fillText(D.name, it.x, by - 60);
+}
+
+// atrás do lutador: aura + cargas
+function drawSuperBack(ctx, f, t) {
+  const S = f.sup; if (!S) return;
+  const D = SUPERS[S.type], P = f.pts, a = S.act, pul = 0.5 + 0.5 * Math.sin(t * 9), hc = P[HIP];
+  supGlow(ctx, hc.x, hc.y - 20, 120 * S.sc + pul * 14, D.c, 0.5);
+  if (S.haste > 0) supGlow(ctx, hc.x, hc.y - 20, 150, '#fde047', 0.35);
+  if (!a) return;
+  const u = a.u !== undefined ? a.u : (a.mv ? a.t / a.mv.T : 0), ch = P[CHEST], dir = a.dir || [f.facing, 0];
+  if (S.type === 'ki') {
+    if (a.k === 1 && u < 0.475) supOrb(ctx, ch.x - f.facing * 22, ch.y + 10, 8 + u / 0.475 * 26, '#67e8f9', t);
+    else if (a.k === 1) supOrb(ctx, ch.x + dir[0] * 30, ch.y + dir[1] * 30, 30, '#67e8f9', t);
+    if (a.k === 3 && u < 0.74) supOrb(ctx, P[HEAD].x, P[HEAD].y - 60, 10 + u / 0.74 * 50, '#fde68a', t);
+  } else if (S.type === 'titan') {
+    if (a.k === 1) { for (let i = 0; i < 3; i++) { ctx.strokeStyle = '#c4b5fd'; ctx.globalAlpha = 0.5; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(f.cx, f.cy, 90 + ((t * 160 + i * 90) % 280), 0, 6.283); ctx.stroke(); } ctx.globalAlpha = 1; }
+    if (a.k === 3) { supGlow(ctx, f.cx, f.cy, 220 * Math.min(1, u * 1.6), '#fde047', 0.5); }
+    if (a.k === 2) supGlow(ctx, f.cx, f.cy, 320 * (1 - u), '#fde047', 0.5);
+  } else if (S.type === 'thunder') {
+    if (a.k === 3 || a.k === 1) { ctx.fillStyle = 'rgba(15,20,50,0.55)'; for (let i = 0; i < 9; i++) { ctx.beginPath(); ctx.arc(80 + i * 140, 30 + Math.sin(t * 2 + i) * 10, 70, 0, 6.283); ctx.fill(); } }
+  } else if (S.type === 'steel' && a.k === 3 && a.ph === 2) {
+    ctx.strokeStyle = '#bfdbfe'; ctx.globalAlpha = 0.6; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(f.x, f.y - 120); ctx.lineTo(f.x, f.y - 360); ctx.stroke(); ctx.globalAlpha = 1;
+  }
+}
+// à frente do lutador: emblema, olhos, mão brilhando
+function drawSuperFront(ctx, f, t) {
+  const S = f.sup; if (!S) return;
+  const D = SUPERS[S.type], P = f.pts, ch = P[CHEST], hd = P[HEAD], s = S.sc;
+  ctx.save();
+  ctx.fillStyle = D.c2; ctx.strokeStyle = '#000'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc((ch.x + P[HIP].x) / 2 + f.facing * 2, (ch.y + P[HIP].y) / 2 - 2, 6.5 * s, 0, 6.283); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = D.c; ctx.beginPath(); ctx.arc((ch.x + P[HIP].x) / 2 + f.facing * 2, (ch.y + P[HIP].y) / 2 - 2, 3.4 * s, 0, 6.283); ctx.fill();
+  const eye = S.type === 'steel' ? '#ff3b3b' : S.type === 'thunder' ? '#93c5fd' : S.type === 'titan' ? '#fde047' : '#ffffff';
+  ctx.fillStyle = eye; ctx.shadowColor = eye; ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(hd.x + f.facing * 5 * s, hd.y - 2, 2.6 * s, 0, 6.283); ctx.fill(); ctx.shadowBlur = 0;
+  if (S.type === 'titan') { const h = P[HDR], cols = ['#a855f7', '#f97316', '#60a5fa', '#4ade80']; for (let i = 0; i < 4; i++) { ctx.fillStyle = cols[i]; ctx.beginPath(); ctx.arc(h.x - 6 + i * 4, h.y - 7, 2.4, 0, 6.283); ctx.fill(); } supGlow(ctx, h.x, h.y, 22, '#fde047', 0.45); }
+  if (S.type === 'thunder') supGlow(ctx, P[HDR].x, P[HDR].y, 20, '#fde047', 0.5);
+  if (f.iceT > 0 || f.timeT > 0) { }
+  ctx.restore();
+}
+
+// golpes (chamado dentro de drawProjs); retorna true se desenhou
+function drawSupProj(ctx, p, t) {
+  const k = p.kind;
+  if (k === 'beam_ki' || k === 'beam_heat') {
+    const len = p.rot, ax = p.vx, ay = p.vy, ex = p.x + ax * len, ey = p.y + ay * len, ki = k === 'beam_ki', w = ki ? (p.w || 38) : (p.w || 14), pul = 1 + 0.12 * Math.sin(t * 40);
+    ctx.save(); ctx.lineCap = 'round';
+    ctx.strokeStyle = ki ? 'rgba(34,211,238,0.30)' : 'rgba(239,68,68,0.30)'; ctx.lineWidth = w * 1.8 * pul; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.strokeStyle = ki ? '#22d3ee' : '#ef4444'; ctx.lineWidth = w * pul; ctx.stroke();
+    ctx.strokeStyle = ki ? '#cffafe' : '#fecaca'; ctx.lineWidth = w * 0.55; ctx.stroke();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = w * 0.22; ctx.stroke();
+    supOrb(ctx, p.x, p.y, w * 0.6, ki ? '#67e8f9' : '#fca5a5', t); supOrb(ctx, ex, ey, w * 0.7, ki ? '#67e8f9' : '#fca5a5', t);
+    ctx.restore(); return true;
+  }
+  if (k === 'strike') {
+    ctx.save();
+    if (p.rot > 0) {
+      const u = 1 - p.rot / 0.7, bl = ((t * 14) | 0) & 1;
+      ctx.fillStyle = 'rgba(253,224,71,' + (0.18 + 0.25 * u) + ')'; ctx.beginPath(); ctx.ellipse(p.x, p.y, 20 + u * 34, 7 + u * 5, 0, 0, 6.283); ctx.fill();
+      ctx.strokeStyle = bl ? '#fde047' : '#f97316'; ctx.lineWidth = 3; ctx.setLineDash([8, 8]); ctx.beginPath(); ctx.ellipse(p.x, p.y, 20 + u * 34, 7 + u * 5, 0, 0, 6.283); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha = 0.25 + u * 0.4; ctx.strokeStyle = '#fde047'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(p.x, 0); ctx.lineTo(p.x, p.y); ctx.stroke();
+    } else {
+      const a = Math.max(0, 1 + p.rot * 3.5); ctx.globalAlpha = a;
+      supGlow(ctx, p.x, p.y, 90, '#fde047', 0.9); ctx.globalAlpha = a;
+      for (const [lw, c] of [[22, 'rgba(253,224,71,0.5)'], [9, '#fde047'], [3, '#fff']]) {
+        ctx.strokeStyle = c; ctx.lineWidth = lw; ctx.lineJoin = 'miter'; ctx.beginPath(); ctx.moveTo(p.x, 0);
+        let seed = ((p.x * 7) | 0) % 97;
+        for (let y = 40; y < p.y; y += 48) { seed = (seed * 31 + 7) % 101; ctx.lineTo(p.x + ((seed % 40) - 20), y); }
+        ctx.lineTo(p.x, p.y); ctx.stroke();
+      }
+    }
+    ctx.restore(); return true;
+  }
+  ctx.save(); ctx.translate(p.x, p.y);
+  if (k === 'kiball') { supOrb(ctx, 0, 0, 9, '#fde68a', t); }
+  else if (k === 'kiorb') { supOrb(ctx, 0, 0, 38, '#fde68a', t); ctx.strokeStyle = '#fff'; ctx.globalAlpha = 0.6; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 50 + Math.sin(t * 20) * 4, 0, 6.283); ctx.stroke(); }
+  else if (k === 'gem_p') {
+    const c = p.rot ? '#f97316' : '#a855f7'; supGlow(ctx, 0, 0, 34, c, 0.7); ctx.rotate(t * 8); ctx.fillStyle = c; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(11, 0); ctx.lineTo(0, 14); ctx.lineTo(-11, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+  } else if (k === 'hammer') {
+    ctx.rotate(p.rot); supGlow(ctx, 0, 0, 40, '#fde047', 0.5);
+    ctx.fillStyle = '#9ca3af'; ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.fillRect(-4, -4, 8, 30); ctx.strokeRect(-4, -4, 8, 30);
+    ctx.fillStyle = '#e5e7eb'; ctx.fillRect(-18, -20, 36, 20); ctx.strokeRect(-18, -20, 36, 20);
+    ctx.fillStyle = '#fde047'; ctx.fillRect(-14, -16, 28, 4);
+  } else { ctx.restore(); return false; }
+  ctx.restore(); return true;
+}
+
+// HUD no mundo: barras de golpe sobre o boss + faixa de aviso
+function drawSuperOver(ctx, m, t) {
+  for (const f of m.fighters) {
+    const S = f.sup; if (!S || !f.alive) continue;
+    const D = SUPERS[S.type], x0 = f.cx - 2 * 30 + 2, y0 = f.pts[HEAD].y - 62 * (S.sc > 1.3 ? 1.15 : 1) - 8;
+    ctx.save(); ctx.textAlign = 'center'; ctx.font = 'bold 11px sans-serif'; ctx.lineWidth = 3; ctx.strokeStyle = '#000'; ctx.fillStyle = D.c;
+    ctx.strokeText(D.name, f.cx, y0 - 8); ctx.fillText(D.name, f.cx, y0 - 8);
+    for (let i = 0; i < 4; i++) {
+      const x = x0 + i * 30, rdy = S.cd[i] <= 0.001;
+      ctx.fillStyle = 'rgba(8,10,25,0.8)'; ctx.fillRect(x, y0, 26, 18);
+      ctx.fillStyle = rdy ? D.c : '#334155'; ctx.fillRect(x + 1, y0 + 1, 24, 16);
+      if (!rdy) { ctx.fillStyle = D.c + 'aa'; ctx.fillRect(x + 1, y0 + 14, 24 * clamp(1 - S.cd[i] / SUP_MOVES[S.type][i].cd, 0, 1), 3); }
+      ctx.fillStyle = rdy ? '#000' : '#cbd5e1'; ctx.font = 'bold 9px sans-serif'; ctx.lineWidth = 0;
+      ctx.fillText(rdy ? D.mv[i].slice(0, 4) : Math.ceil(S.cd[i]), x + 13, y0 + 12);
+      ctx.strokeStyle = rdy ? '#fff' : '#000'; ctx.lineWidth = 1.5; ctx.strokeRect(x, y0, 26, 18);
+    }
+    ctx.restore();
+  }
+  const b = m.banner;
+  if (b) {
+    const a = Math.min(1, b.t * 2, (SUP_BANNER_T - b.t) * 4), sl = Math.min(1, (SUP_BANNER_T - b.t) * 6);
+    ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, 118, WORLD_W, 62);
+    ctx.fillStyle = supHex(b.c); ctx.fillRect(0, 118, WORLD_W, 3); ctx.fillRect(0, 177, WORLD_W, 3);
+    ctx.textAlign = 'center'; ctx.font = 'italic 900 34px sans-serif'; ctx.lineWidth = 6; ctx.strokeStyle = '#000'; ctx.fillStyle = '#fff';
+    const x = WORLD_W / 2 + (1 - sl) * 400;
+    ctx.strokeText(b.s, x, 162); ctx.fillText(b.s, x, 162);
+    ctx.restore();
+  }
+}
+
+'use strict';
+/* STICK MAYHEM v1.7 — novos mapas: Rio de Janeiro, Pixel Craft (blocos) e Estação · Trem */
+const decorOver = {}, decorFront = {};
+function trainState(a, time) {
+  const T = a.train; if (!T) return null;
+  const tt = time - (T.first || 5); if (tt < 0) return null;
+  const k = Math.floor(tt / T.period), u = tt - k * T.period, dir = k % 2 === 0 ? 1 : -1;
+  const warn = u < T.warn, dist = (u - T.warn) * T.speed, active = !warn && dist < WORLD_W + T.len;
+  let x0 = 0, x1 = 0;
+  if (active) { if (dir > 0) { x1 = dist; x0 = dist - T.len; } else { x0 = WORLD_W - dist; x1 = x0 + T.len; } }
+  return {k, dir, warn, active, x0, x1, u, left: warn ? T.warn - u : 0};
+}
+function mHash(x, y) { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >> 13)) * 1274126177 | 0; return ((h ^ (h >> 16)) >>> 0) / 4294967295; }
+
+// ================= RIO DE JANEIRO =================
+decorStatic.rio = function (c) {
+  const r = srng(21);
+  // sol e brilho
+  const sg = c.createRadialGradient(880, 360, 10, 880, 360, 330); sg.addColorStop(0, 'rgba(255,240,180,0.95)'); sg.addColorStop(0.25, 'rgba(255,190,90,0.55)'); sg.addColorStop(1, 'rgba(255,120,60,0)');
+  c.fillStyle = sg; c.fillRect(300, 0, 1000, 640);
+  c.fillStyle = '#fff3c4'; c.beginPath(); c.arc(880, 360, 58, 0, 6.283); c.fill();
+  // nuvens
+  c.fillStyle = 'rgba(255,200,220,0.35)';
+  for (let i = 0; i < 6; i++) { const x = r() * 1280, y = 80 + r() * 200; c.beginPath(); c.ellipse(x, y, 140 + r() * 80, 12 + r() * 8, 0, 0, 6.283); c.fill(); }
+  // montanhas distantes
+  c.fillStyle = '#5b2a86'; c.beginPath(); c.moveTo(0, 520); for (let x = 0; x <= 1280; x += 40) c.lineTo(x, 470 - Math.sin(x * 0.006 + 1) * 50 - Math.sin(x * 0.017) * 22); c.lineTo(1280, 620); c.lineTo(0, 620); c.fill();
+  // Corcovado + Cristo (silhueta)
+  c.fillStyle = '#2d1457'; c.beginPath(); c.moveTo(860, 600); c.quadraticCurveTo(930, 330, 1040, 300); c.quadraticCurveTo(1150, 330, 1230, 600); c.closePath(); c.fill();
+  c.fillStyle = '#3a8a4f'; c.globalAlpha = 0.5; c.beginPath(); c.moveTo(860, 600); c.quadraticCurveTo(930, 380, 1040, 350); c.quadraticCurveTo(1150, 380, 1230, 600); c.closePath(); c.fill(); c.globalAlpha = 1;
+  c.fillStyle = '#e5e7eb'; c.fillRect(1032, 298, 16, 8);   // pedestal
+  c.fillStyle = '#f3f4f6'; c.fillRect(1037, 262, 6, 38); c.fillRect(1014, 266, 52, 6); c.beginPath(); c.arc(1040, 258, 5, 0, 6.283); c.fill();
+  // Pão de Açúcar
+  c.fillStyle = '#42246b'; c.beginPath(); c.moveTo(110, 610); c.bezierCurveTo(130, 520, 160, 440, 260, 400); c.bezierCurveTo(330, 370, 430, 380, 470, 470); c.bezierCurveTo(490, 530, 500, 580, 520, 610); c.closePath(); c.fill();
+  c.fillStyle = '#7f8fa6'; c.globalAlpha = 0.45; c.beginPath(); c.moveTo(220, 600); c.bezierCurveTo(230, 520, 250, 450, 300, 410); c.bezierCurveTo(360, 420, 400, 470, 430, 600); c.closePath(); c.fill(); c.globalAlpha = 1;
+  c.fillStyle = '#3d7a4d'; c.beginPath(); c.moveTo(20, 612); c.quadraticCurveTo(70, 520, 150, 500); c.quadraticCurveTo(210, 510, 240, 612); c.closePath(); c.fill();
+  // mar
+  const sea = c.createLinearGradient(0, 560, 0, 640); sea.addColorStop(0, '#1d9bb5'); sea.addColorStop(1, '#0b5f86'); c.fillStyle = sea; c.fillRect(0, 565, 1280, 80);
+  c.fillStyle = 'rgba(255,230,160,0.55)'; for (let i = 0; i < 16; i++) c.fillRect(840 + r() * 90 - 45, 568 + i * 4, 40 + r() * 70, 2);
+  // prédios coloridos
+  const cols = ['#f59e0b', '#ef4444', '#22c55e', '#38bdf8', '#e879f9', '#fde047', '#fb7185', '#f8fafc'];
+  for (let x = -10; x < 1290; x += 0) {
+    const w = 70 + r() * 60, h = 120 + r() * 150, col = cols[(r() * cols.length) | 0];
+    if (x > 120 && x < 520 && r() < 0.6) { x += 40; continue; }
+    c.fillStyle = col; c.globalAlpha = 0.92; c.fillRect(x, 612 - h, w, h); c.globalAlpha = 0.25; c.fillStyle = '#000'; c.fillRect(x + w * 0.7, 612 - h, w * 0.3, h); c.globalAlpha = 1;
+    c.fillStyle = '#1e293b'; for (let wy = 612 - h + 14; wy < 580; wy += 26) for (let wx = x + 9; wx < x + w - 14; wx += 20) { c.globalAlpha = r() < 0.3 ? 0.95 : 0.6; c.fillRect(wx, wy, 10, 14); }
+    c.globalAlpha = 1; c.fillStyle = '#0f172a'; c.fillRect(x, 612 - h - 5, w, 5);
+    x += w + 4 + r() * 6;
+  }
+  // palmeiras
+  for (const px of [60, 300, 700, 1180]) {
+    c.strokeStyle = '#5a3b1d'; c.lineWidth = 9; c.lineCap = 'round'; c.beginPath(); c.moveTo(px, 612); c.quadraticCurveTo(px + 14, 540, px + 6, 470); c.stroke();
+    c.strokeStyle = '#1f7a3b'; c.lineWidth = 7;
+    for (let i = 0; i < 7; i++) { const a = -2.9 + i * 0.45; c.beginPath(); c.moveTo(px + 6, 470); c.quadraticCurveTo(px + 6 + Math.cos(a) * 36, 470 + Math.sin(a) * 30 - 18, px + 6 + Math.cos(a) * 70, 470 + Math.sin(a) * 52 + 14); c.stroke(); }
+  }
+};
+decorDyn.rio = function (c, t) {
+  if (GFX.low) return;
+  // bondinho no cabo
+  const ax = 330, ay = 392, bx = 150, by = 500, u = 0.5 + 0.5 * Math.sin(t * 0.35), x = ax + (bx - ax) * u, y = ay + (by - ay) * u;
+  c.strokeStyle = '#0f172a'; c.lineWidth = 2; c.beginPath(); c.moveTo(ax, ay); c.lineTo(bx, by); c.stroke();
+  c.fillStyle = '#ef4444'; c.fillRect(x - 12, y + 3, 24, 15); c.fillStyle = '#fef3c7'; c.fillRect(x - 9, y + 6, 6, 6); c.fillRect(x + 1, y + 6, 6, 6); c.fillStyle = '#0f172a'; c.fillRect(x - 1, y - 2, 2, 5);
+  // ondas
+  c.strokeStyle = 'rgba(255,255,255,0.45)'; c.lineWidth = 2;
+  for (let i = 0; i < 9; i++) { const yy = 575 + i * 8, o = (t * 30 * (1 + (i % 3) * 0.3) + i * 90) % 1300; c.beginPath(); c.moveTo(o - 40, yy); c.quadraticCurveTo(o - 20, yy - 4, o, yy); c.quadraticCurveTo(o + 20, yy + 4, o + 40, yy); c.stroke(); }
+  // aves
+  c.strokeStyle = '#1e1b4b'; c.lineWidth = 2;
+  for (let i = 0; i < 4; i++) { const bx2 = ((t * (30 + i * 9) + i * 330) % 1500) - 100, by2 = 110 + i * 40 + Math.sin(t * 2 + i) * 8, w = Math.sin(t * 8 + i) * 4; c.beginPath(); c.moveTo(bx2 - 9, by2 - w); c.quadraticCurveTo(bx2 - 4, by2 - 6 - w, bx2, by2); c.quadraticCurveTo(bx2 + 4, by2 - 6 - w, bx2 + 9, by2 - w); c.stroke(); }
+  // bandeirinhas
+  const cs = ['#22c55e', '#facc15', '#38bdf8', '#ffffff'];
+  for (let i = 0; i < 26; i++) { const x2 = 40 + i * 48, y2 = 150 + Math.sin(x2 * 0.02) * 12 + Math.sin(t * 2 + i) * 2; c.fillStyle = cs[i % 4]; c.beginPath(); c.moveTo(x2, y2); c.lineTo(x2 + 14, y2); c.lineTo(x2 + 7, y2 + 14); c.fill(); }
+  c.strokeStyle = '#0f172a'; c.lineWidth = 1.5; c.beginPath(); for (let x2 = 40; x2 < 1290; x2 += 8) { const y2 = 150 + Math.sin(x2 * 0.02) * 12; x2 === 40 ? c.moveTo(x2, y2) : c.lineTo(x2, y2); } c.stroke();
+};
+decorOver.rio = function (c, t, m) {
+  // calçadão de Copacabana (ondas preto e branco) sobre o chão
+  const g = m.plats[0]; if (!g) return;
+  c.save(); c.beginPath(); c.rect(g.x, g.y + 5, g.w, 38); c.clip();
+  c.fillStyle = '#f5ead3'; c.fillRect(g.x, g.y + 5, g.w, 38);
+  c.fillStyle = '#1b1b1b';
+  for (let row = 0; row < 3; row++) { c.beginPath(); for (let x = g.x; x <= g.x + g.w; x += 8) { const y = g.y + 14 + row * 12 + Math.sin(x * 0.045 + row * 1.7) * 5; x === g.x ? c.moveTo(x, y) : c.lineTo(x, y); } for (let x = g.x + g.w; x >= g.x; x -= 8) { const y = g.y + 21 + row * 12 + Math.sin(x * 0.045 + row * 1.7) * 5; c.lineTo(x, y); } c.closePath(); c.fill(); }
+  c.restore();
+  c.fillStyle = '#c4a574'; c.fillRect(g.x, g.y + 43, g.w, 6);
+  // toldos listrados
+  for (const p of m.plats) if (!p.solid && !p.inv) {
+    c.save(); c.beginPath(); c.rect(p.x, p.y, p.w, 16); c.clip();
+    for (let x = p.x, i = 0; x < p.x + p.w; x += 20, i++) { c.fillStyle = i & 1 ? '#fff7ed' : '#ef4444'; c.fillRect(x, p.y, 20, 16); }
+    c.restore(); c.fillStyle = '#ef4444';
+    for (let x = p.x, i = 0; x < p.x + p.w - 1; x += 20, i++) { c.fillStyle = i & 1 ? '#fff7ed' : '#ef4444'; c.beginPath(); c.arc(x + 10, p.y + 16, 10, 0, 3.1416); c.fill(); }
+    c.strokeStyle = OUT; c.lineWidth = 2.5; c.strokeRect(p.x, p.y, p.w, 16);
+  }
+  // quiosque (bloco sólido central)
+  for (const p of m.plats) if (p.solid && p.w === 80 && p.h === 60) {
+    c.fillStyle = '#fbbf24'; c.fillRect(p.x, p.y, p.w, p.h); c.fillStyle = '#fff'; c.fillRect(p.x + 8, p.y + 14, p.w - 16, 22); c.fillStyle = '#0ea5e9'; c.fillRect(p.x + 12, p.y + 18, p.w - 24, 14);
+    c.fillStyle = '#16a34a'; c.fillRect(p.x - 4, p.y - 6, p.w + 8, 9); c.strokeStyle = OUT; c.lineWidth = 3; c.strokeRect(p.x, p.y, p.w, p.h);
+  }
+};
+
+// ================= PIXEL CRAFT (blocos) =================
+decorStatic.mine = function (c) {
+  const r = srng(5);
+  c.fillStyle = '#fff3a0'; c.fillRect(1010, 70, 90, 90); c.fillStyle = '#fffbd0'; c.fillRect(1026, 86, 58, 58);
+  c.globalAlpha = 0.25; c.fillStyle = '#fff'; c.fillRect(980, 40, 150, 150); c.globalAlpha = 1;
+  // colinas de blocos (2 camadas)
+  for (let l = 0; l < 2; l++) {
+    c.fillStyle = l ? '#3f9a3a' : '#5ab34d';
+    for (let x = 0; x < 1280; x += 40) { const h = 120 + Math.round((Math.sin(x * 0.008 + l * 2) * 60 + Math.sin(x * 0.02 + l) * 30) / 40) * 40 - l * 40; c.fillRect(x, 600 - h, 40, h); c.fillStyle = l ? '#35862f' : '#4da442'; c.fillRect(x, 600 - h, 40, 8); c.fillStyle = l ? '#3f9a3a' : '#5ab34d'; }
+  }
+  // árvores
+  for (const px of [100, 420, 760, 1160]) {
+    const tx = Math.round(px / 40) * 40; c.fillStyle = '#6b4a2b'; for (let i = 1; i <= 3; i++) c.fillRect(tx, 600 - i * 40, 40, 40);
+    c.fillStyle = '#2f7a2f'; for (let dx = -1; dx <= 1; dx++) for (let dy = 0; dy < 2; dy++) c.fillRect(tx + dx * 40, 600 - 160 - dy * 40, 40, 40);
+    c.fillRect(tx, 600 - 240, 40, 40); c.fillStyle = '#3f9a3a'; for (let i = 0; i < 6; i++) c.fillRect(tx - 40 + ((r() * 3) | 0) * 40 + 8, 600 - 160 - ((r() * 3) | 0) * 40 + 8, 12, 12);
+  }
+};
+decorDyn.mine = function (c, t) {
+  c.fillStyle = 'rgba(255,255,255,0.92)';
+  for (let i = 0; i < 4; i++) {
+    const x = Math.round((((i * 380 + t * (14 + i * 4)) % 1600) - 160) / 20) * 20, y = 60 + i * 60;
+    for (let b = 0; b < 5; b++) { c.fillRect(x + b * 28, y + (b % 2 ? -14 : 0), 28, 28); } c.fillRect(x + 28, y - 28, 56, 20);
+  }
+  if (GFX.low) return;
+  // partículas de bloco flutuando
+  for (let i = 0; i < 16; i++) { const x = (i * 83 + t * 8) % 1280, y = 120 + ((i * 47 + Math.sin(t + i) * 10) % 440); c.fillStyle = ['#5dbb3a', '#866043', '#9ca3af'][i % 3]; c.globalAlpha = 0.5; c.fillRect(x, y, 6, 6); } c.globalAlpha = 1;
+};
+decorOver.mine = function (c, t, m) {
+  for (const p of m.plats) {
+    if (p.inv || p.x + p.w < -20 || p.x > WORLD_W + 20) continue;
+    const bs = 40;
+    if (p.solid && p.h > 30) {
+      const x0 = Math.max(0, p.x), x1 = Math.min(WORLD_W, p.x + p.w), rows = Math.min(3, Math.ceil(p.h / bs));
+      for (let ry = 0; ry < rows; ry++) {
+        for (let x = Math.floor(x0 / bs) * bs; x < x1; x += bs) {
+          const y = p.y + ry * bs, hh = Math.min(bs, p.y + p.h - y), base = ry === 0 ? '#866043' : (ry === 1 ? '#7a5638' : '#8b8d92');
+          c.fillStyle = base; c.fillRect(x, y, bs, hh);
+          if (!GFX.low) for (let i = 0; i < 12; i++) { const nx = mHash(x + i, y), ny = mHash(y, x + i); c.fillStyle = nx > 0.5 ? 'rgba(0,0,0,0.16)' : 'rgba(255,255,255,0.10)'; c.fillRect(x + ((nx * 3) | 0) * 10 + 2, y + ((ny * 3) | 0) * 10 + 2, 8, 8); }
+          if (ry === 0) { c.fillStyle = '#5dbb3a'; c.fillRect(x, y, bs, 12); c.fillStyle = '#4da442'; for (let i = 0; i < 4; i++) c.fillRect(x + i * 10, y + 12, 6 + ((mHash(x, i) * 4) | 0), 6); c.fillStyle = '#7ad45c'; c.fillRect(x, y, bs, 3); }
+          c.strokeStyle = 'rgba(0,0,0,0.35)'; c.lineWidth = 2; c.strokeRect(x + 1, y + 1, bs - 2, hh - 2);
+        }
+      }
+    } else if (!p.solid) {
+      for (let x = p.x, i = 0; x < p.x + p.w - 1; x += 20, i++) {
+        const w = Math.min(20, p.x + p.w - x); c.fillStyle = i & 1 ? '#b8874b' : '#c79a5b'; c.fillRect(x, p.y, w, 16);
+        c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(x, p.y + 11, w, 5); c.strokeStyle = 'rgba(60,35,10,0.7)'; c.lineWidth = 2; c.strokeRect(x + 1, p.y + 1, w - 2, 14);
+      }
+      c.strokeStyle = OUT; c.lineWidth = 2.5; c.strokeRect(p.x, p.y, p.w, 16);
+    }
+  }
+};
+
+// ================= ESTAÇÃO · TREM =================
+decorStatic.train = function (c) {
+  const r = srng(33);
+  c.fillStyle = '#ffffff'; for (let i = 0; i < 40; i++) { c.globalAlpha = 0.2 + r() * 0.5; c.fillRect(r() * 1280, r() * 220, 2, 2); } c.globalAlpha = 1;
+  for (let l = 0; l < 2; l++) {
+    c.fillStyle = l ? '#1b2540' : '#111a30';
+    for (let x = -20; x < 1300; x += 60 + r() * 40) {
+      const h = 140 + r() * (l ? 240 : 170), w = 60 + r() * 50; c.fillRect(x, 470 - h, w, h + 150);
+      c.fillStyle = l ? '#fde68a' : '#93c5fd';
+      for (let wy = 470 - h + 12; wy < 440; wy += 22) for (let wx = x + 8; wx < x + w - 10; wx += 15) { if (r() < 0.3) { c.globalAlpha = 0.5 + r() * 0.4; c.fillRect(wx, wy, 6, 9); } }
+      c.globalAlpha = 1; c.fillStyle = l ? '#1b2540' : '#111a30';
+    }
+  }
+  // parede da estação (azulejo)
+  c.fillStyle = '#26324a'; c.fillRect(0, 455, 1280, 165);
+  c.strokeStyle = 'rgba(255,255,255,0.06)'; c.lineWidth = 1; for (let x = 0; x < 1280; x += 40) { c.beginPath(); c.moveTo(x, 455); c.lineTo(x, 620); c.stroke(); } for (let y = 455; y < 620; y += 40) { c.beginPath(); c.moveTo(0, y); c.lineTo(1280, y); c.stroke(); }
+  c.fillStyle = '#0b1220'; c.fillRect(0, 440, 1280, 18);
+  c.fillStyle = '#facc15'; for (let x = 0; x < 1280; x += 48) c.fillRect(x, 446, 24, 6);
+  // pilares + cobertura
+  c.fillStyle = '#334155'; for (const px of [430, 640, 850]) { c.fillRect(px - 8, 130, 16, 330); c.fillStyle = '#475569'; c.fillRect(px - 8, 130, 5, 330); c.fillStyle = '#334155'; }
+  c.fillStyle = '#1e293b'; c.fillRect(380, 100, 520, 34); c.fillStyle = '#facc15'; c.fillRect(380, 130, 520, 4);
+  // relógio
+  c.fillStyle = '#e2e8f0'; c.beginPath(); c.arc(640, 175, 28, 0, 6.283); c.fill(); c.strokeStyle = '#0f172a'; c.lineWidth = 3; c.stroke();
+  c.fillStyle = '#0f172a'; for (let i = 0; i < 12; i++) { const a = i * 0.5236; c.fillRect(640 + Math.sin(a) * 22 - 1.5, 175 - Math.cos(a) * 22 - 1.5, 3, 3); }
+};
+decorDyn.train = function (c, t, m) {
+  const A = m.arena, st = trainState(A, m.time), T = A.train;
+  // ponteiros do relógio e placa
+  c.strokeStyle = '#0f172a'; c.lineWidth = 3; c.beginPath(); c.moveTo(640, 175); c.lineTo(640 + Math.sin(t * 0.1) * 16, 175 - Math.cos(t * 0.1) * 16); c.stroke(); c.lineWidth = 2; c.beginPath(); c.moveTo(640, 175); c.lineTo(640 + Math.sin(t * 1.2) * 22, 175 - Math.cos(t * 1.2) * 22); c.stroke();
+  c.fillStyle = '#0b1220'; c.fillRect(470, 104, 340, 24);
+  const msg = st ? (st.warn ? 'TREM CHEGANDO!  ' + st.left.toFixed(1) + 's' : (st.active ? 'TREM PASSANDO' : 'VIA LIVRE')) : 'VIA LIVRE';
+  c.font = 'bold 17px monospace'; c.textAlign = 'center'; c.fillStyle = st && (st.warn || st.active) ? (((t * 6) | 0) & 1 ? '#ef4444' : '#fca5a5') : '#4ade80'; c.fillText(msg, 640, 122);
+  // sinais nas pontas
+  const warn = st && (st.warn || st.active);
+  for (const sx of [20, 1260]) {
+    c.fillStyle = '#111827'; c.fillRect(sx - 4, 380, 8, 80); c.fillRect(sx - 12, 372, 24, 34);
+    c.fillStyle = warn && ((t * 5) | 0) % 2 === 0 ? '#ef4444' : '#450a0a'; c.beginPath(); c.arc(sx, 382, 6, 0, 6.283); c.fill();
+    c.fillStyle = warn && ((t * 5) | 0) % 2 === 1 ? '#ef4444' : '#450a0a'; c.beginPath(); c.arc(sx, 396, 6, 0, 6.283); c.fill();
+    if (warn && !GFX.low) { c.globalAlpha = 0.25 + 0.2 * Math.sin(t * 20); c.fillStyle = '#ef4444'; c.beginPath(); c.arc(sx, 389, 38, 0, 6.283); c.fill(); c.globalAlpha = 1; }
+  }
+  // faixa de perigo na via
+  if (warn) {
+    const a = st.warn ? 0.14 + 0.14 * Math.sin(t * 14) : 0.2;
+    c.fillStyle = 'rgba(239,68,68,' + a + ')'; c.fillRect(0, T.y0, WORLD_W, T.y1 - T.y0);
+    if (st.warn) {
+      c.fillStyle = '#fff'; c.font = 'bold 40px sans-serif'; c.textAlign = 'center'; c.globalAlpha = 0.5 + 0.5 * (((t * 8) | 0) & 1);
+      const nx = st.dir > 0 ? 70 : WORLD_W - 70; c.fillText(st.dir > 0 ? '»»»' : '«««', nx, 560); c.fillText('!', 640, 560); c.globalAlpha = 1;
+    }
+  }
+};
+decorOver.train = function (c, t, m) {
+  const g = m.plats[0]; if (!g) return;
+  // brita + dormentes + trilhos
+  c.fillStyle = '#4b4b52'; c.fillRect(g.x, g.y + 4, g.w, 22);
+  c.fillStyle = '#6a5a47'; for (let x = g.x + 6; x < g.x + g.w; x += 30) c.fillRect(x, g.y + 6, 18, 12);
+  c.fillStyle = '#9ca3af'; c.fillRect(g.x, g.y + 2, g.w, 5); c.fillStyle = '#d1d5db'; c.fillRect(g.x, g.y + 2, g.w, 2); c.fillStyle = '#9ca3af'; c.fillRect(g.x, g.y + 15, g.w, 5);
+  c.strokeStyle = OUT; c.lineWidth = 2; c.strokeRect(g.x, g.y, g.w, 26);
+  // plataformas da estação: faixa amarela
+  for (const p of m.plats) if (!p.solid) { c.fillStyle = '#cbd5e1'; c.fillRect(p.x, p.y, p.w, 16); c.fillStyle = '#facc15'; c.fillRect(p.x, p.y, p.w, 5); c.fillStyle = '#0f172a'; for (let x = p.x; x < p.x + p.w; x += 20) c.fillRect(x, p.y, 10, 5); c.fillStyle = '#94a3b8'; c.fillRect(p.x, p.y + 10, p.w, 6); c.strokeStyle = OUT; c.lineWidth = 2.5; c.strokeRect(p.x, p.y, p.w, 16); }
+};
+decorFront.train = function (c, t, m) {
+  const A = m.arena, T = A.train, st = trainState(A, m.time); if (!st || !st.active) return;
+  const x0 = st.x0, x1 = st.x1, y0 = T.y0, y1 = T.y1, dir = st.dir, ncar = 5, gap = 10, cw = (T.len - gap * (ncar - 1)) / ncar;
+  c.save();
+  for (let i = 0; i < ncar; i++) {
+    const cx0 = x0 + i * (cw + gap), head = (dir > 0 ? i === ncar - 1 : i === 0);
+    if (cx0 > WORLD_W + 10 || cx0 + cw < -10) continue;
+    c.fillStyle = '#1e40af'; c.fillRect(cx0, y0, cw, y1 - y0 - 14); c.fillStyle = '#1d4ed8'; c.fillRect(cx0, y0, cw, 14);
+    c.fillStyle = '#facc15'; c.fillRect(cx0, y0 + 62, cw, 10); c.fillStyle = '#e5e7eb'; c.fillRect(cx0, y0 + 74, cw, 4);
+    c.fillStyle = '#0f172a'; c.fillRect(cx0, y1 - 20, cw, 8);
+    for (let w = 0; w < 4; w++) { const wx = cx0 + 18 + w * (cw - 36) / 4; c.fillStyle = '#fde68a'; c.fillRect(wx, y0 + 20, (cw - 36) / 4 - 14, 32); c.fillStyle = 'rgba(0,0,0,0.25)'; c.fillRect(wx, y0 + 44, (cw - 36) / 4 - 14, 8); }
+    c.strokeStyle = OUT; c.lineWidth = 3; c.strokeRect(cx0, y0, cw, y1 - y0 - 12);
+    c.fillStyle = '#111827'; for (const wx of [cx0 + 30, cx0 + 74, cx0 + cw - 74, cx0 + cw - 30]) { c.beginPath(); c.arc(wx, y1 - 8, 9, 0, 6.283); c.fill(); }
+    if (head) {
+      const nx = dir > 0 ? cx0 + cw : cx0;
+      c.fillStyle = '#facc15'; c.beginPath(); c.moveTo(nx, y0 + 6); c.lineTo(nx + dir * 26, y0 + 36); c.lineTo(nx + dir * 26, y1 - 30); c.lineTo(nx, y1 - 14); c.closePath(); c.fill(); c.strokeStyle = OUT; c.stroke();
+      c.fillStyle = '#fff'; c.beginPath(); c.arc(nx + dir * 16, y0 + 46, 7, 0, 6.283); c.fill();
+      const g = c.createRadialGradient(nx + dir * 16, y0 + 46, 2, nx + dir * 16, y0 + 46, 160); g.addColorStop(0, 'rgba(255,250,200,0.8)'); g.addColorStop(1, 'rgba(255,250,200,0)'); c.fillStyle = g; c.fillRect(nx + dir * 16 - 160, y0 - 110, 320, 330);
+    }
+  }
+  // faíscas
+  if (!GFX.low) { c.fillStyle = '#fde68a'; for (let i = 0; i < 18; i++) { const sx = x0 + Math.random() * T.len, sy = y1 - 6 + Math.random() * 6; c.fillRect(sx, sy, 3, 3); } }
+  c.restore();
+};
 
 'use strict';
 /* STICK MAYHEM v1.1.0 — render dos efeitos de AWAKENING (auras, trilhas, ondas, pilar de luz, distorção, zoom) */
@@ -5141,7 +6056,7 @@ class NetLink {
 // ---------------------------------------------------------------- sala
 const Net = {
   role: null,            // null | 'host' | 'client'
-  code: '', pid: -1, players: [], opts: {arena: 'neon', lives: 3, weapons: true, awk: false, fatality: false}, phase: 'idle', // idle|connecting|lobby|play|result
+  code: '', pid: -1, players: [], opts: {arena: 'neon', lives: 3, weapons: true, awk: false, fatality: false, supers: true}, phase: 'idle', // idle|connecting|lobby|play|result
   ping: 0, status: '', sig: null, links: {}, hostLink: null, inputs: {}, ev: [], seq: 0, on: {}, inSim: false,
   conf() {
     // padrão: o próprio site que serve o jogo (Render) também faz a sinalização; abrindo o arquivo local (file://) cai no servidor público do PeerJS
@@ -5288,11 +6203,11 @@ const Net = {
     const used = [];
     pl.forEach(p => { while (used.includes(p.skin.color.toLowerCase())) p.skin.color = shadeHex(p.skin.color); used.push(p.skin.color.toLowerCase()); });
     const awk = !!this.opts.awk, cfg = {mode: 'online', arena: this.opts.arena, format: 'stock', lives: this.opts.lives, weapons: this.opts.weapons !== false, camFx: true, players: pl, online: true,
-      awk: {on: awk, charge: 'normal', dmg: 'normal'}, fatality: !!this.opts.fatality};
+      awk: {on: awk, charge: 'normal', dmg: 'normal'}, fatality: !!this.opts.fatality, supers: this.opts.supers !== false};
     if (awk) cfg.hp = AWK.hp;
     this.phase = 'play'; this.inputs = {};
     for (const p of pl) if (p.pid !== 0) this.inputs[p.pid] = newInput();
-    this.bcast({k: 'start', cfg: {arena: cfg.arena, lives: cfg.lives, weapons: cfg.weapons, awk, fatality: cfg.fatality, players: pl}});
+    this.bcast({k: 'start', cfg: {arena: cfg.arena, lives: cfg.lives, weapons: cfg.weapons, awk, fatality: cfg.fatality, supers: cfg.supers, players: pl}});
     for (const k in this.links) this.links[k].cnt = {j: 0, s: 0, d: 0, a: 0};
     this.emit('room'); return cfg;
   },
@@ -5305,6 +6220,7 @@ const Net = {
     m.addShock = (...a) => { if (ev.length < 140) ev.push(['sh'].concat(a)); return sh(...a); };
     m.addBeam = (...a) => { if (ev.length < 140) ev.push(['bm'].concat(a)); return bm(...a); };
     m.onReact = (f, i) => ev.push(['rx', f.id, i]);
+    const sb = m.showBanner.bind(m); m.showBanner = (s, c) => { ev.push(['sb', s, c]); return sb(s, c); };
     const ok = m.onKill.bind(m); m.onKill = (k, v, w) => { ev.push(['kf', k ? k.id : -1, v.id]); return ok(k, v, w); };
     if (!this._sfx) { this._sfx = SFX.play; const orig = this._sfx; const self = this; SFX.play = function (n) { if (self.inSim && n !== 'react' && self.ev.length < 140) self.ev.push(['s', n]); return orig.apply(SFX, arguments); }; }
   },
@@ -5322,6 +6238,7 @@ const Net = {
       r(f.flash), r(f.atkT), r(f.wAng), r(f.aimA), r(f.charge), r(f.beamT), f.boomN | 0, r(f.specialCd), f.kills, f.wp ? f.wp.id : '', f.wp ? (f.wp.ammo | 0) : 0, f.celebrate ? 1 : 0, f.winAnim | 0, r(f.celeT), r(f.phase), f.deaths | 0, Math.round(f.dmgDealt)];
     for (let i = 0; i < 11; i++) a.push(r(f.pts[i].x), r(f.pts[i].y));
     a.push(r(f.energy), f.awk ? this.packAwk(f.awk) : 0);
+    { const S = f.sup; a.push(S ? [SUPER_IDS.indexOf(S.type), S.act ? S.act.k : -1, S.act ? r(S.act.t / S.act.mv.T) : 0, r(S.cd[0]), r(S.cd[1]), r(S.cd[2]), r(S.cd[3]), r(S.haste), S.act && S.act.arm ? S.act.arm : 0, S.act && S.act.ph !== undefined ? S.act.ph : -1, S.act && S.act.dir ? [r(S.act.dir[0]), r(S.act.dir[1])] : 0, Math.round(f.maxhp)] : 0); }
     return a;
   },
   packSnap(m) {
@@ -5332,6 +6249,7 @@ const Net = {
       p: m.projs.map(p => [p.kind, r(p.x), r(p.y), r(p.vx), r(p.vy), r(p.rot || 0)]),
       b: m.bombs.map(b => [b.wid || 'grenade', r(b.x), r(b.y), r(b.vx), r(b.vy), r(b.rot), r(b.fuse)]),
       mi: m.mines.map(x => [r(x.x), r(x.y), x.armed ? 1 : 0]),
+      su: m.supItem ? [SUPER_IDS.indexOf(m.supItem.type), r(m.supItem.x), r(m.supItem.y)] : 0,
       cn: (c => [Math.round(c.dim * 100) / 100, Math.round(c.flash * 100) / 100, c.flashC, Math.round(c.zoom * 1000) / 1000, r(c.cx), r(c.cy), Math.round(c.light * 100) / 100, c.lightC, Math.round(c.dist * 100) / 100, r(c.dx), r(c.dy), r(c.dr), c.dtype, Math.round(c.rot * 1000) / 1000])(m.cine)};
   },
   // chamado a cada quadro de render durante a partida
@@ -5414,7 +6332,7 @@ const Net = {
         const c = m.cfg || {}; this.phase = 'play';
         const pl = (c.players || []).slice(0, NET_MAX).map(p => ({pid: p.pid | 0, name: netClean(p.name, 12), color: NET_HEX.test(p.color) ? p.color : NET_COLORS[p.pid & 3], skin: netSkin(p.skin, p.pid & 3)}));
         this.snap = null; this.ev = []; this.cnt = {j: 0, s: 0, d: 0, a: 0}; this.evq = [];
-        const awk = !!c.awk, cf = {mode: 'online', arena: ARENAS[c.arena] ? c.arena : 'neon', format: 'stock', lives: Math.max(1, Math.min(10, c.lives | 0 || 3)), weapons: c.weapons !== false, camFx: true, players: pl, online: true, client: true, awk: {on: awk, charge: 'normal', dmg: 'normal'}, fatality: !!c.fatality};
+        const awk = !!c.awk, cf = {mode: 'online', arena: ARENAS[c.arena] ? c.arena : 'neon', format: 'stock', lives: Math.max(1, Math.min(10, c.lives | 0 || 3)), weapons: c.weapons !== false, camFx: true, players: pl, online: true, client: true, awk: {on: awk, charge: 'normal', dmg: 'normal'}, fatality: !!c.fatality, supers: c.supers !== false};
         if (awk) cf.hp = AWK.hp;
         this.emit('start', cf);
         break;
@@ -5456,7 +6374,7 @@ window.addEventListener('pagehide', () => { if (Net.role) { try { Net.leave(true
 // ---------------------------------------------------------------- cliente: partida espelhada
 Match.prototype.updateNetClient = function (dt) {
   const net = Net, s = net.snap, F = this.fighters;
-  this.fx.update(dt);
+  this.fx.update(dt); this.supClient(dt);
   { const q = net.evq; if (q && q.length) { net.evq = []; for (const e of q) this.applyEv(e); } }
   if (s) {
     if (net.snapNew) { net.snapNew = false; this.applySnap(s); }
@@ -5509,6 +6427,7 @@ Match.prototype.applySnap = function (s) {
     f.flash = a[13]; f.atkT = a[14]; f.wAng = a[15]; f.aimA = a[16]; f.charge = a[17]; f.beamT = a[18]; f.boomN = a[19]; f.specialCd = a[20]; f.kills = a[21];
     f.wp = a[22] ? {id: a[22], ammo: a[23], uses: 0} : null; f.celebrate = !!a[24]; f.winAnim = a[25]; f.celeT = a[26]; f.phase = a[27]; f.deaths = a[28]; f.dmgDealt = a[29];
     f.stun = f.ragdoll ? 1 : 0; f.aimOn = false; f.energy = a[52] || 0; f.awk = a[53] ? Net.unpackAwk(a[53], F) : null;
+    { const q = a[54]; if (q) { const ty = SUPER_IDS[q[0]]; if (ty) { if (!f.sup || f.sup.type !== ty) { f.sup = {type: ty, sc: SUPERS[ty].sc, cd: [0, 0, 0, 0], act: null, haste: 0}; f.h = BH * f.sup.sc; } const S = f.sup; S.cd = [q[3], q[4], q[5], q[6]]; S.haste = q[7]; f.maxhp = q[11] || f.maxhp; S.act = q[1] >= 0 ? {k: q[1], u: q[2], arm: q[8] || undefined, ph: q[9] >= 0 ? q[9] : undefined, dir: q[10] || undefined} : null; } } else if (f.sup) { f.sup = null; f.h = BH; f.maxhp = f.baseMax || 100; } }
     if (first) { f.x = a[0]; f.y = a[1]; for (let j = 0; j < 11; j++) { f.pts[j].x = f.pts[j].px = a[30 + j * 2]; f.pts[j].y = f.pts[j].py = a[31 + j * 2]; } f.capeReset(); }
   });
   if (s.e) { const w = s.w >= 0 ? F[s.w] : null; this.result = {winner: w || null, time: s.t, draw: s.w === -2, timeUp: !!s.tu}; }
@@ -5517,6 +6436,7 @@ Match.prototype.applySnap = function (s) {
   this.projs = s.p.map(a => ({kind: a[0], x: a[1], y: a[2], vx: a[3], vy: a[4], rot: a[5]}));
   this.bombs = s.b.map(a => ({wid: a[0], x: a[1], y: a[2], vx: a[3], vy: a[4], rot: a[5], fuse: a[6]}));
   this.mines = s.mi.map(a => ({x: a[0], y: a[1], armed: !!a[2]}));
+  { const u = s.su, was = this.supItem; if (u && SUPER_IDS[u[0]]) this.supItem = {type: SUPER_IDS[u[0]], x: u[1], y: u[2], t: was ? was.t : 0, vy: 0}; else this.supItem = null; }
 };
 Match.prototype.applyEv = function (e) {
   const fx = this.fx;
@@ -5529,6 +6449,7 @@ Match.prototype.applyEv = function (e) {
     case 's': SFX.play(e[1]); break;
     case 'sh': this.addShock(e[1], e[2], e[3], e[4], e[5], e[6], e[7]); break;
     case 'bm': this.addBeam(e[1], e[2], e[3]); break;
+    case 'sb': this.showBanner(String(e[1]).slice(0, 60), /^#[0-9a-f]{6}$/i.test(e[2]) ? e[2] : '#fff'); break;
     case 'rx': { const f = this.fighters[e[1]]; if (f && f.alive) reactNow(f, e[2]); break; }
     case 'kf': { const k = this.fighters[e[1]], v = this.fighters[e[2]]; if (v) this.onKill(k || null, v); break; }
   }
@@ -5541,7 +6462,7 @@ $$('[data-i]').forEach(e => { e.outerHTML = ico(e.dataset.i); });
 const SAVE_KEY = 'stickmayhem_v1';
 
 // ---------- salvamento ----------
-const RULES0 = {score: 'none', cRounds: 3, lives: 3, cLives: 4, time: 0, cTime: 90, awk: false, charge: 'normal', dmg: 'normal', weapons: true, fx: true, fatality: false};
+const RULES0 = {score: 'none', cRounds: 3, lives: 3, cLives: 4, time: 0, cTime: 90, awk: false, charge: 'normal', dmg: 'normal', weapons: true, fx: true, fatality: false, supers: true};
 const KEYS0 = {
   p1: {l: 'KeyA', r: 'KeyD', u: 'KeyW', d: 'KeyS', atk: 'KeyF', sp: 'KeyG', awk: 'KeyR', drop: 'KeyH'},
   p2: {l: 'ArrowLeft', r: 'ArrowRight', u: 'ArrowUp', d: 'ArrowDown', atk: 'KeyK', sp: 'KeyL', awk: 'KeyO', drop: 'KeyI'},
@@ -5771,7 +6692,7 @@ const GP = {
     if (du || dd) y = dd ? 1 : -1;
     let rx = p.axes[2] || 0, ry = p.axes[3] || 0; const rm = Math.hypot(rx, ry);
     if (rm < 0.35) { rx = 0; ry = 0; } else { rx /= rm; ry /= rm; }
-    return {rx, ry, x, y, up: du, down: dd, a: b(0), bb: b(1), atk: b(2) || b(5) || b(7), sp: b(1) || b(4) || b(6), drop: b(3), jump: b(0) || du, start: b(9), awk: b(8) || b(10) || b(11)};
+    return {rx, ry, x, y, up: du, down: dd, a: b(0), bb: b(1), atk: b(2) || b(5) || b(7), sp: b(1) || b(4) || b(6), drop: b(3), jump: b(0) || du, start: b(9), awk: b(8) || b(10) || b(11) || (b(4) && b(5))};
   },
   // atualiza o estado de cada slot de jogador; devolve true se algum controle foi usado
   poll(ctl) {
@@ -5931,13 +6852,13 @@ function fmtTime(sec) { return Math.floor(sec / 60) + ':' + String(sec % 60).pad
 function roundTarget(R) { const n = R.score === 'custom' ? R.cRounds : +R.score; return Math.floor(n / 2) + 1; }
 function baseCfg() {
   const s = save.sel;
-  if (s.mode === 'chaos') return {mode: 'chaos', arena: s.arena, diff: s.diff, format: s.format, lives: 3};
+  if (s.mode === 'chaos') return {mode: 'chaos', arena: s.arena, diff: s.diff, format: s.format, lives: 3, supers: true};
   const R = save.rules[rulesKey()];
   const mode = s.mode, isAwk = !!R.awk;
   const lives = R.lives === 'custom' ? R.cLives : +R.lives;
   const time = R.time === 'custom' ? R.cTime : +R.time;
   return {mode, variant: isAwk ? 'awk' : 'duel', arena: s.arena, diff: s.diff, format: 'stock', lives, hp: isAwk ? AWK.hp : 100,
-    awk: {on: !!R.awk, charge: R.charge, dmg: R.dmg}, timeLimit: time, weapons: !!R.weapons, camFx: !!R.fx,
+    awk: {on: !!R.awk, charge: R.charge, dmg: R.dmg}, timeLimit: time, weapons: !!R.weapons, supers: R.supers !== false, camFx: !!R.fx,
     score: R.score, target: R.score === 'none' || R.score === 'board' ? 0 : roundTarget(R), fatality: !!R.fatality && R.score !== 'board'};
 }
 function buildConfig() {
@@ -5978,6 +6899,8 @@ function buildConfig() {
   chips(ar.querySelector('.chips'), ARENA_IDS.map(id => [id, ARENAS[id].name]), sel.arena, v => { sel.arena = v; rb(); });
   if (cpu) { const d = document.createElement('div'); d.className = 'row'; d.innerHTML = '<label>Nível da CPU</label><div class="chips"></div>'; b.appendChild(d); chips(d.querySelector('.chips'), DIFF_NAMES.map((n, i) => [i, n]), sel.diff, v => { sel.diff = v; rb(); }); }
   row('Armas no mapa', [[true, 'LIGADAS'], [false, 'DESLIGADAS']], 'weapons');
+  if (R.supers === undefined) R.supers = true;
+  row('SUPER ARMAS (boss)', [[true, 'LIGADAS'], [false, 'DESLIGADAS']], 'supers');
   row('Efeitos visuais', [[true, 'LIGADOS'], [false, 'DESLIGADOS']], 'fx');
   const ch = document.createElement('div'); ch.className = 'row';
   const nm = x => ((COSM.color.list.find(c => c[0] === save[x].color) || [0, ''])[1]) + ' · ' + AWK_TYPES[save[x].awk].short;
@@ -6264,7 +7187,7 @@ function buildSettings() {
   toggle('Tremor de câmera', 'shake');
   toggle('Vibração (haptic)', 'haptic');
   toggle('Controles espelhados (canhoto)', 'mirror');
-  const gpr = document.createElement('div'); gpr.className = 'row'; gpr.innerHTML = '<label>' + ico('gamepad') + ' Controle</label><span class="val" style="flex:1;text-align:right;font-size:.8em">' + (GP.list().length ? GP.list().length + ' conectado(s). A pula · analógico direito mira 360° · X/R1/RT ataca · B/L1/LT especial · Y larga · Back/clique no analógico = AWAKENING · Start pausa' : 'Conecte um controle (USB/Bluetooth) e aperte um botão.') + '</span>'; b.appendChild(gpr);
+  const gpr = document.createElement('div'); gpr.className = 'row'; gpr.innerHTML = '<label>' + ico('gamepad') + ' Controle</label><span class="val" style="flex:1;text-align:right;font-size:.8em">' + (GP.list().length ? GP.list().length + ' conectado(s). A pula · analógico direito mira 360° · X/R1/RT ataca · B/L1/LT especial · Y larga · Back/clique no analógico (ou LB+RB) = AWAKENING / golpe final do SUPER · Start pausa' : 'Conecte um controle (USB/Bluetooth) e aperte um botão.') + '</span>'; b.appendChild(gpr);
   const o = document.createElement('div'); o.className = 'row'; o.innerHTML = '<label>Tela cheia / orientação</label><button class="btn">' + ico('full') + ' <span>TELA CHEIA + PAISAGEM</span></button>'; o.querySelector('button').onclick = () => { toggleFS(); }; b.appendChild(o);
   const r = document.createElement('div'); r.className = 'row'; r.innerHTML = '<label>Dados salvos</label><button class="btn danger">APAGAR PROGRESSO</button>';
   r.querySelector('button').onclick = () => { if (confirm('Apagar moedas, itens, estatísticas e configurações?')) { save = defaults(); persist(); applySettings(); buildSettings(); updCoins(); toast('Progresso apagado.'); } };
@@ -6308,7 +7231,7 @@ function startGame(cfg) {
   if (cfg.online && !cfg.client) Net.attach(app.scene);
   if (cfg.camFx === false) app.scene.fx.shakeOn = false;
   app.state = 'game'; app.endReal = 0; app.acc = 0;
-  document.body.classList.toggle('awk-on', !!(cfg.awk && cfg.awk.on));
+  document.body.classList.toggle('awk-on', !!(cfg.awk && cfg.awk.on)); document.body.classList.remove('boss0', 'boss1'); hudSuper._t = []; $$('.cb[data-l]').forEach(e => { delete e.dataset.l; e.classList.remove('cdn'); });
   document.body.classList.remove('kb');
   [0, 1].forEach(sl => { const f = app.scene.fighters.find(x => x.slot === sl); const c = AWK_TYPES[f ? f.awkType : 'void'].c; const h = c.replace('#', ''); const rgb = [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16)).join(','); $$('.cb.awk[data-s="' + sl + '"]').forEach(e => { e.style.setProperty('--c', rgb); e.style.setProperty('--p', 0); e.classList.remove('ready'); }); });
   showScreen(null); $('#hud').classList.remove('hidden'); $('#ctrl').classList.remove('hidden');
@@ -6318,7 +7241,7 @@ function startGame(cfg) {
 function leaveGame(toScreen) {
   clearInterval(roundTimer);
   app.state = 'menu'; app.game = null; app.series = null; app.vic = null;
-  Controls.setMode('none'); $('#hud').classList.add('hidden'); $('#ctrl').classList.add('hidden'); document.body.classList.remove('awk-on', 'kb');
+  Controls.setMode('none'); $('#hud').classList.add('hidden'); $('#ctrl').classList.add('hidden'); document.body.classList.remove('awk-on', 'kb', 'boss0', 'boss1');
   newMenuScene(); applySettings(); SFX.duck(false); SFX.music('menu'); go(toScreen || 'menu');
 }
 function pauseGame() {
@@ -6513,16 +7436,31 @@ function frame(ts) {
     }
     if (app.state === 'game' && sc.ended) { app.endReal += dt; if (app.endReal > 2.8 && !Net.role) onMatchEnd(); else if (app.endReal > 2.8 && Net.role === 'host' && !app.netEnded) { app.netEnded = true; onlineHostEnd(sc); } }
     if (app.state === 'fatality' && sc.fat && sc.fat.done) { app.fatWait += dt; if (app.fatWait > 1.8) { if (app.fatOn) onlineFatDone(); else showFatEnd(); } }
-    if (app.state === 'game') hudAwk(sc);
+    if (app.state === 'game') { hudAwk(sc); hudSuper(sc); }
     renderFrame(ctx, cv.width, cv.height, sc, app.t, view);
   } else { ctx.fillStyle = '#0b0820'; ctx.fillRect(0, 0, cv.width, cv.height); }
 }
 
 // ---------- início ----------
-$('#ver').textContent = 'STICK MAYHEM ' + VERSION + ' — LOBBY REACTIONS & ONLINE UPDATE CHAT UPDATE';
+$('#ver').textContent = 'STICK MAYHEM ' + VERSION + ' — SUPER ARMAS & NOVOS MAPAS';
 applySettings(); resize(); newMenuScene(); updCoins();
 if (!isFinite(save.coins)) save.coins = 0;
 requestAnimationFrame(frame);
+const SUP_BTN = ['atk', 'sp', 'drop', 'awk'];
+function hudSuper(sc) {
+  for (let sl = 0; sl < 2; sl++) {
+    const f = sc.fighters.find(x => x.slot === sl), on = !!(f && f.sup && f.alive), cls = 'boss' + sl;
+    if (!!document.body.classList['contains'](cls) !== on || (on && f.sup.type !== (hudSuper._t || [])[sl])) {
+      document.body.classList.toggle(cls, on); (hudSuper._t = hudSuper._t || [])[sl] = on ? f.sup.type : null;
+      SUP_BTN.forEach((a, i) => $$('.cb.' + a + '[data-s="' + sl + '"]').forEach(e => { if (on) { e.dataset.l = SUPERS[f.sup.type].mv[i]; } else { delete e.dataset.l; e.classList.remove('cdn'); if (a === 'awk') { e._p = -1; e._r = null; e.style.setProperty('--p', 0); } } }));
+    }
+    if (!on) continue;
+    SUP_BTN.forEach((a, i) => $$('.cb.' + a + '[data-s="' + sl + '"]').forEach(e => {
+      const cd = f.sup.cd[i], rdy = cd <= 0.001; e.classList.toggle('cdn', !rdy);
+      if (a === 'awk') { e.classList.toggle('ready', rdy); e.style.setProperty('--p', rdy ? 100 : Math.round(100 * (1 - cd / SUP_MOVES[f.sup.type][3].cd))); e.style.setProperty('--c', SUPERS[f.sup.type].c.replace('#', '').match(/../g).map(h => parseInt(h, 16)).join(',')); }
+    }));
+  }
+}
 function hudAwk(sc) {
   if (!sc.cfg.awk || !sc.cfg.awk.on) return;
   for (let sl = 0; sl < 2; sl++) {
@@ -6656,6 +7594,7 @@ function onlineRender() {
   set('#on-o-lives', [1, 3, 5, 10].map(n => [n, String(n)]), o.lives, 'lives');
   set('#on-o-weap', [[true, 'LIGADAS'], [false, 'DESLIGADAS']], o.weapons !== false, 'weapons');
   set('#on-o-awk', [[true, 'LIGADO'], [false, 'DESLIGADO']], !!o.awk, 'awk');
+  set('#on-o-sup', [[true, 'LIGADAS'], [false, 'DESLIGADAS']], o.supers !== false, 'supers');
   set('#on-o-fat', [[true, 'LIGADA'], [false, 'DESLIGADA']], !!o.fatality, 'fatality');
   const st = $('#on-start'); st.classList.toggle('hidden', !host); st.disabled = !Net.canStart();
   $('#on-status').textContent = host ? (P.length < 2 ? 'Aguardando pelo menos mais 1 jogador para iniciar…' : 'Pronto! Toque em INICIAR PARTIDA.') : 'Aguardando o host iniciar a partida…';
